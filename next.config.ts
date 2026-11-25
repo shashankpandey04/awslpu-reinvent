@@ -4,7 +4,7 @@ const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://static.cloudflareinsights.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  img-src 'self' blob: data: https://dqq6hmbhjgrfe.cloudfront.net https://static.awslpu.in https://*.cloudfront.net;
+  img-src 'self' blob: data: https://dqq6hmbhjgrfe.cloudfront.net https://static.awslpu.in https://*.cloudfront.net https://api.qrserver.com;
   font-src 'self' data: https://fonts.gstatic.com;
   media-src 'self' blob: data: https://static.awslpu.in https://dqq6hmbhjgrfe.cloudfront.net https://*.cloudfront.net;
   connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://dqq6hmbhjgrfe.cloudfront.net https://static.awslpu.in https://cloudflareinsights.com https://*.cloudflareinsights.com;
@@ -31,7 +31,20 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "static.awslpu.in",
       },
+      {
+        protocol: "https",
+        hostname: "api.qrserver.com",
+      },
     ],
+  },
+  async redirects() {
+    return [
+      {
+        source: "/advertisement",
+        destination: "/adversitment",
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     return [
