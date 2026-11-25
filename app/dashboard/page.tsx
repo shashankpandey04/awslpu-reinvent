@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
@@ -22,7 +22,8 @@ import {
   Sparkles,
   Save,
   CheckCircle2,
-  Ban
+  Ban,
+  Loader2
 } from "lucide-react"
 import { useAuth } from "@/providers/auth-provider"
 import { QrCode } from "@/components/qr-code"
@@ -30,7 +31,7 @@ import { PassLanyard } from "@/components/pass-lanyard"
 import type { Ticket } from "@/types/ticketing"
 import type { Venue } from "@/types/schedule"
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, loading, authenticated, refreshUser } = useAuth()
@@ -931,5 +932,22 @@ export default function DashboardPage() {
         )}
       </section>
     </main>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
+          <div className="flex items-center gap-3 text-white/50 text-sm">
+            <Loader2 className="h-5 w-5 animate-spin text-[#FF00D4]" />
+            <span>Loading dashboard...</span>
+          </div>
+        </main>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   )
 }

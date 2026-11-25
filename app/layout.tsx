@@ -5,8 +5,6 @@ import { Footer } from "@/components/footer";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { AuthProvider } from "@/providers/auth-provider";
 
-export const dynamic = 'force-dynamic';
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://reinvent.awslpu.in"),
 
