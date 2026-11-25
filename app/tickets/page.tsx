@@ -1286,6 +1286,19 @@ export default function TicketsPage() {
               </div>
             )}
 
+            <div className="mt-6 border border-[#FF00D4]/40 bg-[#FF00D4]/10 p-4 text-xs font-mono text-white/90">
+              <span className="font-bold text-[#FF2D87]">Action Required:</span> Also Create Account using{" "}
+              <a
+                href="https://builder.aws.com?inviteId=ba23057e-824f-4bed-b54d-379253ff527e"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#FF00D4] underline hover:text-[#FF2D87] font-semibold break-all"
+              >
+                https://builder.aws.com?inviteId=ba23057e-824f-4bed-b54d-379253ff527e
+              </a>{" "}
+              this link before joining the event.
+            </div>
+
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/dashboard"
