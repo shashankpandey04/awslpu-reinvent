@@ -44,6 +44,11 @@ const nextConfig: NextConfig = {
         destination: "/adversitment",
         permanent: true,
       },
+      {
+        source: "/ticketsWhat's",
+        destination: "/tickets",
+        permanent: true,
+      },
     ];
   },
   async headers() {
