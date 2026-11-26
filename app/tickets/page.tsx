@@ -78,7 +78,7 @@ const universalPerks = [
     title: "Catering & High-Tea",
     description: "Complimentary chef-prepared meals, beverages, energy snacks, and daily high-tea.",
     icon: Sparkles,
-    tag: "5 Days Included"
+    tag: "3 Days Included"
   }
 ]
 

@@ -36,8 +36,6 @@ const experiences = [
 ];
 
 const journey = [
-  ["30 NOV", "THE BEGINNING"],
-  ["01 DEC", "NEW PERSPECTIVES"],
   ["02 DEC", "IDEAS & POSSIBILITIES"],
   ["03 DEC", "BEYOND THE ANNOUNCEMENTS"],
   ["04 DEC", "WHAT COMES NEXT"],
@@ -160,7 +158,7 @@ export default function ExperiencePage() {
 
           <div className="mt-16 flex flex-col gap-4 border-t border-white/20 pt-5 text-xs tracking-[0.12em] text-white/60 sm:flex-row sm:items-center sm:justify-between">
             <span>AWS STUDENT BUILDER GROUP · LPU</span>
-            <span>30 NOV — 04 DEC 2026</span>
+            <span>02 DEC - 04 DEC 2026</span>
             <span>PHAGWARA, PUNJAB</span>
           </div>
         </div>

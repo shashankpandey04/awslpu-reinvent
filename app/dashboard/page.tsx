@@ -17,7 +17,6 @@ import {
   Copy,
   Check,
   AlertCircle,
-  ExternalLink,
   Clock,
   Sparkles,
   Save,
@@ -27,16 +26,14 @@ import {
 } from "lucide-react"
 import { useAuth } from "@/providers/auth-provider"
 import { QrCode } from "@/components/qr-code"
-import { PassLanyard } from "@/components/pass-lanyard"
 import type { Ticket } from "@/types/ticketing"
-import type { Venue } from "@/types/schedule"
 
 function DashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, loading, authenticated, refreshUser } = useAuth()
 
-  const [activeTab, setActiveTab] = useState<"overview" | "tickets" | "profile" | "guide">(
+  const [activeTab, setActiveTab] = useState<"overview" | "tickets" | "profile">(
     searchParams.get("tab") === "profile" ? "profile" : "overview"
   )
   const [tickets, setTickets] = useState<Ticket[]>([])
@@ -44,8 +41,6 @@ function DashboardContent() {
   const [ticketError, setTicketError] = useState<string | null>(null)
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
   const [copiedCode, setCopiedCode] = useState(false)
-  const [venues, setVenues] = useState<Venue[]>([])
-  const [loadingVenues, setLoadingVenues] = useState(false)
 
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
@@ -102,24 +97,6 @@ function DashboardContent() {
     }
     loadTickets()
   }, [authenticated])
-
-  useEffect(() => {
-    async function loadVenues() {
-      try {
-        setLoadingVenues(true)
-        const res = await fetch("/api/venues")
-        if (res.ok) {
-          const data = await res.json()
-          setVenues(Array.isArray(data) ? data : [])
-        }
-      } catch {
-        setVenues([])
-      } finally {
-        setLoadingVenues(false)
-      }
-    }
-    loadVenues()
-  }, [])
 
   const handleCopyTicketCode = (code: string) => {
     navigator.clipboard.writeText(code)
@@ -200,48 +177,45 @@ function DashboardContent() {
 
   return (
     <main className="min-h-screen bg-[#050505] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(108,0,255,0.12),transparent_55%)]" />
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute inset-x-0 top-0 h-[34rem] bg-[radial-gradient(ellipse_at_50%_0%,rgba(108,0,255,0.16),transparent_65%)]" />
+        <div className="absolute -left-40 top-[42rem] h-96 w-96 rounded-full bg-[#FF00D4]/[0.035] blur-3xl" />
+      </div>
 
-      <section className="relative mx-auto max-w-375 px-5 pb-24 pt-32 sm:px-10 sm:pt-40 lg:px-16">
-        <div className="flex flex-col justify-between gap-6 border-b border-white/10 pb-10 sm:flex-row sm:items-end">
-          <div>
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-[#FF2D87]">
-              Attendee Portal
+      <section className="relative mx-auto max-w-[1400px] overflow-x-clip px-4 pb-32 pt-24 sm:px-8 sm:pb-24 sm:pt-32 lg:px-12 lg:pt-36">
+        <header className="mb-5 flex items-center justify-between gap-3 sm:mb-8">
+          <div className="min-w-0">
+            <p className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#c5a5ff] sm:text-[10px]">
+              <Sparkles className="h-3 w-3" />
+              AWS re:Invent Fest 2026
             </p>
-
-            <h1 className="text-4xl font-light tracking-[-0.06em] sm:text-6xl">
-              Welcome,{" "}
-              <span className="bg-linear-to-r from-[#FF2D87] via-[#FF00D4] to-[#8B5CFF] bg-clip-text text-transparent">
-                {user.first_name}.
-              </span>
+            <h1 className="mt-1 truncate text-[clamp(1.45rem,6vw,2rem)] font-semibold tracking-[-0.04em] text-white">
+              Hey, <span className="text-[#e7a9ff]">{user.first_name}</span>
             </h1>
-
-            <p className="mt-4 text-sm text-white/50">
-              Manage your Re:Invent Fest passes, access QR entry codes, and customize your experience.
-            </p>
+            <p className="mt-0.5 text-[11px] text-white/45 sm:text-xs">Your festival, all in one place.</p>
           </div>
 
-          <div className="flex items-center gap-3">
-
-            <div className="flex items-center gap-2 border border-emerald-400/20 bg-emerald-400/6 px-4 py-2.5 text-xs text-emerald-400">
+          <div className="flex shrink-0 flex-col items-end gap-2">
+            <div className="flex items-center gap-1.5 rounded-full bg-emerald-400/[0.08] px-2.5 py-1.5 text-[9px] text-emerald-300 sm:px-3 sm:text-[10px]">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Verified Attendee
+              <span>Verified</span>
             </div>
-
             <Link
               href="/tickets"
-              className="flex h-10 items-center justify-center border border-[#FF00D4] bg-[#FF00D4]/20 px-5 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-[#FF00D4]/30 transition-all shadow-[0_0_20px_rgba(255,0,212,0.2)]"
+              aria-label={tickets.length > 0 ? "View tickets" : "Get a pass"}
+              className="flex h-9 items-center justify-center gap-2 rounded-full bg-[#FF00D4] px-3.5 text-[10px] font-semibold text-white shadow-[0_0_20px_rgba(255,0,212,0.16)] transition-all hover:bg-[#FF2D87] sm:h-10 sm:px-5 sm:text-xs"
             >
-              Get Pass
+              <TicketIcon className="h-3.5 w-3.5" />
+              <span>{tickets.length > 0 ? "Tickets" : "Get a pass"}</span>
             </Link>
           </div>
-        </div>
+        </header>
 
         {/* Security Alert: Blocked Account Banner */}
         {user.is_blocked && (
-          <div className="mt-8 border border-rose-500 bg-rose-950/40 p-6 backdrop-blur-md shadow-[0_0_35px_rgba(244,63,94,0.25)]">
+          <div className="mb-6 rounded-2xl bg-rose-950/35 p-4 shadow-[0_0_35px_rgba(244,63,94,0.14)] sm:mb-8 sm:p-6">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm border border-rose-500 bg-rose-500/20 text-rose-400">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-400 sm:h-12 sm:w-12">
                 <Ban className="h-6 w-6" />
               </div>
               <div className="space-y-1">
@@ -262,30 +236,40 @@ function DashboardContent() {
           </div>
         )}
 
-        <div className="mt-8 flex gap-2 border-b border-white/10 pb-4 overflow-x-auto scrollbar-none">
+        <nav aria-label="Dashboard sections" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 gap-1 border-t border-white/[0.08] bg-[#09070d]/95 px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur-xl sm:sticky sm:top-2 sm:z-30 sm:mb-8 sm:flex sm:w-fit sm:gap-1 sm:overflow-x-auto sm:rounded-full sm:border-0 sm:bg-[#17131e]/90 sm:p-1.5 sm:shadow-[0_8px_28px_rgba(0,0,0,0.25)] sm:ring-1 sm:ring-white/[0.07] sm:scrollbar-none">
           <button
             type="button"
             onClick={() => setActiveTab("overview")}
-            className={`px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all ${
+            aria-pressed={activeTab === "overview"}
+            className={`flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-1.5 text-[9px] font-semibold tracking-wide transition-all sm:min-h-0 sm:shrink-0 sm:flex-row sm:gap-2 sm:rounded-full sm:px-5 sm:py-2.5 sm:text-xs ${
               activeTab === "overview"
-                ? "border border-[#FF00D4] bg-[#FF00D4]/15 text-white shadow-[0_0_15px_rgba(255,0,212,0.2)]"
-                : "border border-transparent text-white/50 hover:text-white"
+                ? "bg-[#FF00D4] text-white shadow-[0_4px_16px_rgba(255,0,212,0.18)]"
+                : "text-white/55 hover:bg-white/[0.06] hover:text-white"
             }`}
           >
-            Overview
+            <CalendarDays className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> Overview
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("tickets")}
-            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all ${
+            aria-pressed={activeTab === "tickets"}
+            className={`flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-1.5 text-[9px] font-semibold tracking-wide transition-all sm:min-h-0 sm:shrink-0 sm:flex-row sm:gap-2 sm:rounded-full sm:px-5 sm:py-2.5 sm:text-xs ${
               activeTab === "tickets"
-                ? "border border-[#FF00D4] bg-[#FF00D4]/15 text-white shadow-[0_0_15px_rgba(255,0,212,0.2)]"
-                : "border border-transparent text-white/50 hover:text-white"
+                ? "bg-[#FF00D4] text-white shadow-[0_4px_16px_rgba(255,0,212,0.18)]"
+                : "text-white/55 hover:bg-white/[0.06] hover:text-white"
             }`}
           >
-            <span>My Tickets</span>
+            <span className="relative">
+              <TicketIcon className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+              {tickets.length > 0 && (
+                <span className="absolute -right-2 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#ff4dd8] px-1 text-[8px] text-white sm:hidden">
+                  {tickets.length}
+                </span>
+              )}
+            </span>
+            <span>My tickets</span>
             {tickets.length > 0 && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#FF00D4] text-[9px] text-white">
+              <span className="hidden h-4 min-w-4 items-center justify-center rounded-full bg-black/20 px-1 text-[9px] text-white sm:flex">
                 {tickets.length}
               </span>
             )}
@@ -293,151 +277,203 @@ function DashboardContent() {
           <button
             type="button"
             onClick={() => setActiveTab("profile")}
-            className={`px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all ${
+            aria-pressed={activeTab === "profile"}
+            className={`flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-1.5 text-[9px] font-semibold tracking-wide transition-all sm:min-h-0 sm:shrink-0 sm:flex-row sm:gap-2 sm:rounded-full sm:px-5 sm:py-2.5 sm:text-xs ${
               activeTab === "profile"
-                ? "border border-[#FF00D4] bg-[#FF00D4]/15 text-white shadow-[0_0_15px_rgba(255,0,212,0.2)]"
-                : "border border-transparent text-white/50 hover:text-white"
+                ? "bg-[#FF00D4] text-white shadow-[0_4px_16px_rgba(255,0,212,0.18)]"
+                : "text-white/55 hover:bg-white/[0.06] hover:text-white"
             }`}
           >
-            Profile & Account
+            <UserRound className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> Profile
           </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("guide")}
-            className={`px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all ${
-              activeTab === "guide"
-                ? "border border-[#FF00D4] bg-[#FF00D4]/15 text-white shadow-[0_0_15px_rgba(255,0,212,0.2)]"
-                : "border border-transparent text-white/50 hover:text-white"
-            }`}
-          >
-            Festival Venue Guide
-          </button>
-        </div>
+        </nav>
 
         {activeTab === "overview" && (
-          <div className="mt-8 space-y-8">
-            <div className="grid gap-5 lg:grid-cols-[1.5fr_0.9fr]">
-              <div className="relative overflow-hidden border border-white/10 bg-white/2.5 p-8 sm:p-12">
-                <div className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full bg-[#8B5CFF]/15 blur-[100px]" />
+          <div className="space-y-4 sm:space-y-6">
+            <div className="grid gap-4 lg:grid-cols-[1.45fr_0.85fr]">
+              <div className="order-2 relative overflow-hidden rounded-[1.75rem] bg-[#17121f] p-4 sm:rounded-[2rem] sm:p-8 lg:p-10">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_84%_12%,rgba(207,49,217,0.24),transparent_38%),radial-gradient(ellipse_at_12%_100%,rgba(88,65,191,0.17),transparent_44%)]" />
+                <div className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full border border-white/[0.06]" />
+                <div className="pointer-events-none absolute -right-12 bottom-12 h-48 w-48 rounded-full border border-white/[0.07]" />
 
-                <div className="relative">
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#FF2D87]">
-                    30 Nov — 04 Dec 2026
+                <div className="relative flex flex-col items-start">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white/[0.07] px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#f4c4ff]">
+                    <CalendarDays className="h-3 w-3" /> 02 Dec - 04 Dec 2026
                   </span>
 
-                  <h2 className="mt-6 text-5xl font-light leading-[0.92] tracking-[-0.07em] sm:text-7xl">
-                    Imagine.
-                    <br />
-                    Build.
-                    <br />
-                    <span className="bg-linear-to-r from-[#FF2D87] via-[#FF00D4] to-[#8B5CFF] bg-clip-text text-transparent">
-                      Re:Invent.
-                    </span>
+                  <h2 className="mt-4 max-w-xl text-[clamp(2rem,8vw,4.5rem)] font-semibold leading-[0.95] tracking-[-0.07em]">
+                    Make room for{" "}
+                    <span className="bg-gradient-to-r from-[#f3b4ff] via-[#ff4dd8] to-[#a58bff] bg-clip-text text-transparent">what&apos;s next.</span>
                   </h2>
 
-                  <div className="mt-8 flex flex-wrap items-center gap-6 text-xs text-white/60">
-                    <span className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-[#FF00D4]" />
-                      Lovely Professional University, Punjab
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-[#8B5CFF]" />
-                      5 Days of Sessions, Labs & Hackathons
-                    </span>
-                  </div>
+                  <p className="mt-3 max-w-md text-[11px] leading-relaxed text-white/55 sm:text-sm">
+                    Three days to explore cloud, meet builders and turn big ideas into something real.
+                  </p>
 
-                  <div className="mt-8 flex flex-wrap gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("tickets")}
-                      className="flex h-11 items-center gap-2 border border-white/25 bg-white/[0.04] px-6 text-xs font-semibold uppercase tracking-wider text-white hover:border-[#FF00D4]"
-                    >
-                      <TicketIcon className="h-4 w-4 text-[#FF00D4]" />
-                      <span>View My Passes ({tickets.length})</span>
-                    </button>
-                    <Link
-                      href="/schedule"
-                      className="flex h-11 items-center gap-2 border border-white/20 px-6 text-xs uppercase tracking-wider text-white/70 hover:border-white hover:text-white"
-                    >
-                      <span>Explore Schedule</span>
-                      <ArrowUpRight className="h-4 w-4" />
-                    </Link>
+                  <div className="mt-4 flex w-full flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-[10px] text-white/55 sm:text-[11px]">
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5 text-[#e178f2]" />
+                        LPU, Punjab
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5 text-[#a58bff]" />
+                        Sessions, labs & hackathons
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-2 sm:min-w-44">
+                      {tickets.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab("tickets")}
+                          className="flex h-10 items-center justify-center gap-2 rounded-full bg-white text-xs font-semibold text-[#17121f] transition hover:bg-[#f4c4ff]"
+                        >
+                          <TicketIcon className="h-3.5 w-3.5" />
+                          View my passes ({tickets.length})
+                        </button>
+                      ) : (
+                        <Link
+                          href="/tickets"
+                          className="flex h-10 items-center justify-center gap-2 rounded-full bg-white px-4 text-xs font-semibold text-[#17121f] transition hover:bg-[#f4c4ff] dark:bg-white/[0.08] dark:text-white dark:hover:bg-white/[0.14]"
+                        >
+                          <TicketIcon className="h-3.5 w-3.5" />
+                          Explore tickets
+                        </Link>
+                      )}
+                      <Link
+                        href="/schedule"
+                        className="flex h-10 items-center justify-center gap-2 rounded-full bg-white/[0.06] text-[10px] text-white/75 transition hover:bg-white/[0.1] hover:text-white sm:text-xs"
+                      >
+                        <span>Explore schedule</span>
+                        <ArrowUpRight className="h-4 w-4" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col justify-between border border-white/10 bg-white/[0.025] p-8">
+              <div className="order-1 flex flex-col justify-between overflow-hidden rounded-[1.75rem] bg-[#14111a] p-4 ring-1 ring-white/[0.06] sm:rounded-[2rem] sm:p-6">
                 <div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#FF00D4]">
-                      <TicketIcon className="h-4 w-4" />
-                      Pass Summary
+                    <div>
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">At a glance</p>
+                      <h3 className="mt-1 text-lg font-semibold text-white">Your pass</h3>
                     </div>
-                    <span className="text-xs text-white/40">
-                      {tickets.length} Registered
+                    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FF00D4]/10 text-[#f28bff]">
+                      <TicketIcon className="h-4 w-4" />
                     </span>
                   </div>
 
                   {loadingTickets ? (
-                    <div className="my-10 flex justify-center">
-                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-[#FF00D4]" />
+                    <div className="mt-4 flex min-h-32 items-center justify-center rounded-2xl bg-black/20">
+                      <Loader2 className="h-6 w-6 animate-spin text-[#e7a9ff]" />
                     </div>
                   ) : tickets.length > 0 ? (
-                    <div className="relative mt-4 h-[460px] w-full">
-                      <PassLanyard
-                        category={tickets[0].category_name}
-                        holder={user ? `${user.first_name} ${user.last_name}` : ""}
-                        ticketCode={tickets[0].ticket_code}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedTicket(tickets[0])
-                          setActiveTab("tickets")
-                        }}
-                        className="absolute bottom-0 right-0 cursor-pointer text-[10px] uppercase tracking-wider text-white/50 hover:text-[#FF2D87]"
-                      >
-                        {tickets[0].status} · View ticket →
-                      </button>
+                    <div className="mt-4 rounded-2xl bg-black/20 p-3 sm:p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="shrink-0 rounded-xl bg-white p-2">
+                          <QrCode value={tickets[0].ticket_code} size={84} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-semibold uppercase ${
+                            tickets[0].status === "valid"
+                              ? "bg-emerald-400/10 text-emerald-300"
+                              : "bg-white/[0.08] text-white/55"
+                          }`}>
+                            {tickets[0].status}
+                          </span>
+                          <h4 className="mt-2 break-words text-sm font-semibold leading-tight text-white">
+                            {tickets[0].category_name}
+                          </h4>
+                          <p className="mt-1 truncate font-mono text-[9px] text-[#e7a9ff]">
+                            {tickets[0].ticket_code}
+                          </p>
+                          <p className="mt-1.5 flex items-center gap-1.5 text-[10px] text-white/45">
+                            <CalendarDays className="h-3 w-3 shrink-0" />
+                            02 Dec - 04 Dec 2026
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTicket(tickets[0])}
+                          className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full bg-white text-[10px] font-semibold text-[#17121f] transition hover:bg-[#f4c4ff]"
+                        >
+                          <QrIcon className="h-3.5 w-3.5" />
+                          View pass
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyTicketCode(tickets[0].ticket_code)}
+                          aria-label="Copy ticket verification code"
+                          className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.08] text-white/70 transition hover:bg-white/[0.14]"
+                        >
+                          {copiedCode ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                        </button>
+                        {tickets.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab("tickets")}
+                            className="flex h-9 items-center rounded-full bg-white/[0.08] px-3 text-[10px] text-white/75 transition hover:bg-white/[0.14]"
+                          >
+                            All {tickets.length}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ) : (
-                    <div className="my-8 text-center">
-                      <TicketIcon className="mx-auto h-8 w-8 text-white/20" />
-                      <p className="mt-3 text-sm text-white/60">No tickets yet.</p>
-                      <p className="mt-1 text-xs text-white/40">
-                        Select a pass to claim your admission spot.
-                      </p>
+                    <div className="mt-4 flex items-center gap-3 rounded-2xl bg-black/20 p-4">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FF00D4]/10 text-[#f28bff]">
+                        <TicketIcon className="h-5 w-5" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-white">Your pass is waiting</p>
+                        <p className="mt-1 text-[10px] leading-relaxed text-white/45">Choose a ticket to save your place.</p>
+                      </div>
+                      <Link
+                        href="/tickets"
+                        aria-label="Browse available passes"
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FF00D4] text-white transition hover:bg-[#FF2D87]"
+                      >
+                        <ArrowUpRight className="h-4 w-4" />
+                      </Link>
                     </div>
                   )}
                 </div>
 
                 <Link
                   href="/tickets"
-                  className="mt-6 flex h-11 items-center justify-between border border-[#FF00D4]/50 bg-[#FF00D4]/10 px-5 text-xs font-semibold uppercase tracking-wider text-white hover:bg-[#FF00D4]/20 transition-all"
+                  className="mt-5 flex h-11 items-center justify-between rounded-full bg-[#FF00D4] px-5 text-xs font-semibold text-white transition-all hover:bg-[#FF2D87]"
                 >
-                  <span>Book Festival Pass</span>
-                  <ArrowUpRight className="h-4 w-4 text-[#FF00D4]" />
+                  <span>{tickets.length > 0 ? "Browse more tickets" : "Browse festival passes"}</span>
+                  <ArrowUpRight className="h-4 w-4 text-white/80" />
                 </Link>
               </div>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2">
-              <div className="border border-white/10 bg-white/[0.02] p-7">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-[1.75rem] bg-[#14111a] p-5 ring-1 ring-white/[0.06] sm:p-7">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">Profile Overview</h3>
-                  <UserRound className="h-5 w-5 text-[#FF2D87]" />
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.17em] text-white/40">Your details</p>
+                    <h3 className="mt-1 text-lg font-semibold">Profile overview</h3>
+                  </div>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FF00D4]/10 text-[#e7a9ff]">
+                    <UserRound className="h-4 w-4" />
+                  </span>
                 </div>
 
-                <div className="mt-6 space-y-4 text-xs">
+                <div className="mt-5 grid gap-2 text-xs sm:grid-cols-2">
                   <div>
-                    <span className="text-white/40">Full Name</span>
-                    <p className="mt-1 text-sm text-white font-medium">{fullName}</p>
+                    <span className="text-white/40">Full name</span>
+                    <p className="mt-1 break-words text-sm font-medium text-white">{fullName}</p>
                   </div>
                   <div>
-                    <span className="text-white/40">Registered Email</span>
-                    <p className="mt-1 text-sm text-white">{user.email}</p>
+                    <span className="text-white/40">Email</span>
+                    <p className="mt-1 break-all text-sm text-white">{user.email}</p>
                   </div>
-                  <div>
+                  <div className="sm:col-span-2">
                     <span className="text-white/40">Institution</span>
                     <p className="mt-1 text-sm text-white">
                       {user.academic?.institution || "Not added yet"}
@@ -448,44 +484,49 @@ function DashboardContent() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("profile")}
-                  className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-xs text-[#FF2D87] hover:underline w-full"
+                  className="mt-5 flex w-full items-center justify-between rounded-xl bg-white/[0.04] px-4 py-3 text-xs text-[#e7a9ff] transition hover:bg-white/[0.08]"
                 >
                   <span>Edit Profile & Academic Details</span>
                   <ArrowUpRight className="h-3.5 w-3.5" />
                 </button>
               </div>
 
-              <div className="border border-white/10 bg-white/[0.02] p-7">
+              <div className="rounded-[1.75rem] bg-[#14111a] p-5 ring-1 ring-white/[0.06] sm:p-7">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">Account Details</h3>
-                  <ShieldCheck className="h-5 w-5 text-[#8B5CFF]" />
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.17em] text-white/40">Account standing</p>
+                    <h3 className="mt-1 text-lg font-semibold">All in one place</h3>
+                  </div>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#8B5CFF]/10 text-[#b69aff]">
+                    <ShieldCheck className="h-4 w-4" />
+                  </span>
                 </div>
 
-                <div className="mt-6 space-y-4 text-xs">
-                  <div className="flex justify-between items-center py-1 border-b border-white/10">
-                    <span className="text-white/50">Email Status</span>
+                <div className="mt-5 space-y-2 text-xs">
+                  <div className="flex items-center justify-between rounded-xl bg-white/[0.035] px-3.5 py-3">
+                    <span className="text-white/55">Email status</span>
                     <span className={user.email_verified ? "text-emerald-400" : "text-amber-400"}>
                       {user.email_verified ? "Verified" : "Pending"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-1 border-b border-white/10">
-                    <span className="text-white/50">Account Status</span>
+                  <div className="flex items-center justify-between rounded-xl bg-white/[0.035] px-3.5 py-3">
+                    <span className="text-white/55">Account status</span>
                     <span className={user.is_active ? "text-emerald-400" : "text-red-400"}>
                       {user.is_active ? "Active" : "Inactive"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-1 border-b border-white/10">
-                    <span className="text-white/50">Roles</span>
-                    <div className="flex gap-1">
+                  <div className="flex items-center justify-between gap-3 rounded-xl bg-white/[0.035] px-3.5 py-3">
+                    <span className="text-white/55">Roles</span>
+                    <div className="flex flex-wrap justify-end gap-1">
                       {user.roles.map((r) => (
-                        <span key={r} className="border border-[#8B5CFF]/30 px-2 py-0.5 text-[10px] uppercase text-[#B69AFF]">
+                        <span key={r} className="rounded-full bg-[#8B5CFF]/15 px-2.5 py-1 text-[9px] uppercase text-[#c5a5ff]">
                           {r}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <div className="flex justify-between items-center py-1">
-                    <span className="text-white/50">Member Since</span>
+                  <div className="flex items-center justify-between rounded-xl bg-white/[0.035] px-3.5 py-3">
+                    <span className="text-white/55">Member since</span>
                     <span className="text-white/70">
                       {new Date(user.created_at).toLocaleDateString("en-IN", {
                         day: "numeric",
@@ -501,15 +542,16 @@ function DashboardContent() {
         )}
 
         {activeTab === "tickets" && (
-          <div className="mt-8">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <div className="mt-5 sm:mt-8">
+            <div className="mb-5 flex flex-col justify-between gap-3 sm:mb-8 sm:flex-row sm:items-end">
               <div>
-                <h2 className="text-2xl font-light tracking-tight">Your Festival Tickets</h2>
-                <p className="text-xs text-white/50 mt-1">
-                  Present your ticket QR code at the event entrance for verification and badge collection.
+                <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#e178f2]">Your event essentials</p>
+                <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Passes & entry</h2>
+                <p className="mt-1 text-[11px] leading-relaxed text-white/50 sm:text-xs">
+                  Keep your QR code ready to make arrival at the festival effortless.
                 </p>
               </div>
-              <span className="text-xs text-[#FF00D4] uppercase font-semibold">
+              <span className="w-fit rounded-full bg-white/[0.06] px-3 py-1.5 text-[10px] font-medium text-white/65 sm:text-xs">
                 {tickets.length} {tickets.length === 1 ? "Ticket" : "Tickets"}
               </span>
             </div>
@@ -520,96 +562,99 @@ function DashboardContent() {
                 <p className="mt-4 text-xs uppercase tracking-widest">Loading issued tickets...</p>
               </div>
             ) : tickets.length === 0 ? (
-              <div className="mt-12 flex flex-col items-center justify-center border border-white/10 bg-white/[0.015] py-20 text-center">
-                <TicketIcon className="h-12 w-12 text-white/20" />
-                <h3 className="mt-4 text-lg font-medium text-white/80">No Tickets Issued Yet</h3>
+              <div className="mt-8 flex flex-col items-center justify-center rounded-[2rem] bg-[radial-gradient(ellipse_at_50%_0%,rgba(169,65,194,0.12),transparent_60%)] px-5 py-14 text-center ring-1 ring-white/[0.07] sm:mt-12 sm:py-20">
+                <span className="flex h-16 w-16 items-center justify-center rounded-[1.4rem] bg-[#FF00D4]/10 text-[#e178f2]">
+                  <TicketIcon className="h-7 w-7" />
+                </span>
+                <h3 className="mt-5 text-lg font-semibold text-white/90">Your first pass is still out there</h3>
                 <p className="mt-2 max-w-sm text-xs leading-relaxed text-white/50">
                   You haven't purchased any festival passes yet. Reserve your pass now to secure entry to AWS Re:Invent Fest 2026.
                 </p>
                 <Link
                   href="/tickets"
-                  className="mt-6 flex h-11 items-center gap-2 border border-[#FF00D4] bg-[#FF00D4]/20 px-6 text-xs font-semibold uppercase tracking-wider text-white hover:bg-[#FF00D4]/30"
+                  className="mt-6 flex h-11 items-center gap-2 rounded-full bg-[#FF00D4] px-6 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-[#FF2D87]"
                 >
                   Browse Available Passes
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             ) : (
-              <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3 sm:mt-8">
                 {tickets.map((ticket) => (
-                  <div
+                  <article
                     key={ticket.id}
-                    className="group relative flex flex-col justify-between border border-white/15 bg-white/[0.025] p-6 transition-all hover:border-[#FF00D4] hover:shadow-[0_0_35px_rgba(255,0,212,0.15)]"
+                    className="group relative overflow-hidden rounded-[1.75rem] bg-[#17131d] p-4 ring-1 ring-white/[0.07] transition hover:-translate-y-0.5 hover:ring-[#d35be7]/35 sm:p-5"
                   >
-                    <div>
-                      <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#FF2D87]">
-                          re:Invent 2026 Pass
+                    <div className="pointer-events-none absolute -right-14 -top-20 h-48 w-48 rounded-full bg-[#b438c6]/[0.09] blur-3xl transition group-hover:bg-[#b438c6]/[0.16]" />
+                    <div className="relative">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#e7a9ff]">
+                          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#FF00D4]/10 text-[10px] text-white">re:</span>
+                          Festival pass · 2026
                         </span>
                         <span
-                          className={`px-2.5 py-0.5 text-[9px] uppercase font-semibold ${
+                          className={`rounded-full px-2.5 py-1 text-[9px] font-semibold uppercase ${
                             ticket.status === "valid"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
+                              ? "bg-emerald-400/10 text-emerald-300"
+                              : "bg-amber-400/10 text-amber-300"
                           }`}
                         >
                           {ticket.status}
                         </span>
                       </div>
 
-                      <h3 className="mt-4 text-2xl font-light tracking-tight text-white">
+                      <h3 className="mt-4 font-serif text-2xl font-semibold tracking-tight text-white">
                         {ticket.category_name}
                       </h3>
+                      <p className="mt-1 text-xs text-white/45">Admit one · {fullName}</p>
 
-                      <p className="mt-1 text-xs text-white/50">
-                        Holder: {fullName}
-                      </p>
-
-                      <div className="my-6 flex justify-center">
-                        <QrCode value={ticket.ticket_code} size={180} />
+                      <div className="my-4 flex items-center gap-4 rounded-2xl bg-white/[0.035] p-3">
+                        <QrCode value={ticket.ticket_code} size={136} />
+                        <div className="min-w-0 space-y-3 text-[10px]">
+                          <div>
+                            <p className="text-white/35">FESTIVAL DATES</p>
+                            <p className="mt-1 text-xs text-white/85">02 Dec - 04 Dec 2026</p>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-white/35">TICKET CODE</p>
+                            <p className="mt-1 truncate font-mono text-[9px] text-[#e7a9ff]">{ticket.ticket_code}</p>
+                          </div>
+                          <p className={`flex items-center gap-1.5 ${
+                            ticket.status === "valid" ? "text-emerald-300" : "text-white/50"
+                          }`}>
+                            <CheckCircle2 className="h-3 w-3" />
+                            {ticket.status === "valid"
+                              ? "Ready for entry"
+                              : ticket.status === "used"
+                                ? "Already checked in"
+                                : ticket.status === "refunded"
+                                  ? "Ticket refunded"
+                                  : "Ticket cancelled"}
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="space-y-2 border-t border-white/10 pt-4 text-[11px] text-white/60">
-                        <div className="flex justify-between">
-                          <span className="text-white/40">Status</span>
-                          <span className="text-emerald-400 capitalize">{ticket.status}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-white/40">Dates</span>
-                          <span className="text-white">30 Nov — 04 Dec 2026</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-white/40">Ticket Code</span>
-                          <span className="font-mono text-[9px] text-[#FF00D4] line-clamp-1 max-w-[130px]">
-                            {ticket.ticket_code}
-                          </span>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTicket(ticket)}
+                          className="flex h-10 flex-1 items-center justify-center gap-2 rounded-full bg-white text-xs font-semibold text-[#17131d] transition hover:bg-[#f4c4ff]"
+                        >
+                          <QrIcon className="h-3.5 w-3.5" />
+                          View full pass
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyTicketCode(ticket.ticket_code)}
+                          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.08] text-white/65 transition hover:bg-white/15 hover:text-white"
+                          title="Copy ticket verification code"
+                          aria-label="Copy ticket verification code"
+                        >
+                          {copiedCode ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                        </button>
                       </div>
                     </div>
-
-                    <div className="mt-6 flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTicket(ticket)}
-                        className="flex-1 flex h-10 items-center justify-center gap-1.5 border border-white/20 bg-white/5 text-xs uppercase tracking-wider hover:border-[#FF00D4] hover:text-white transition-all"
-                      >
-                        <QrIcon className="h-3.5 w-3.5 text-[#FF00D4]" />
-                        <span>View Pass</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyTicketCode(ticket.ticket_code)}
-                        className="flex h-10 w-10 items-center justify-center border border-white/20 hover:border-white transition-all text-white/60 hover:text-white"
-                        title="Copy ticket verification code"
-                      >
-                        {copiedCode ? (
-                          <Check className="h-4 w-4 text-emerald-400" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
+                  </article>
                 ))}
               </div>
             )}
@@ -617,18 +662,23 @@ function DashboardContent() {
         )}
 
         {activeTab === "profile" && (
-          <div className="mx-auto mt-8 max-w-3xl border border-white/10 bg-white/[0.02] p-8 sm:p-12">
-            <div className="border-b border-white/10 pb-6">
-              <h2 className="text-2xl font-light tracking-tight">Attendee Profile</h2>
-              <p className="mt-1 text-xs text-white/50">
+          <div className="mx-auto mt-5 max-w-3xl rounded-[2rem] bg-[#14111a] p-4 ring-1 ring-white/[0.07] sm:mt-8 sm:p-8">
+            <div className="mb-6 flex items-center gap-3 border-b border-white/[0.08] pb-5">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FF00D4]/10 text-[#e7a9ff]">
+                <UserRound className="h-5 w-5" />
+              </span>
+              <div>
+                <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Your attendee profile</h2>
+                <p className="mt-1 text-[11px] text-white/45 sm:text-xs">
                 Keep your attendee badge information and academic affiliation up to date.
-              </p>
+                </p>
+              </div>
             </div>
 
             {searchParams.get("checkout") === "profile-incomplete" && (
               <div
                 role="alert"
-                className="mt-6 flex items-start gap-3 border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-200"
+                className="mt-6 flex items-start gap-3 rounded-xl bg-amber-500/10 p-4 text-sm text-amber-200"
               >
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
                 <p>
@@ -639,21 +689,23 @@ function DashboardContent() {
             )}
 
             {profileSuccess && (
-              <div className="mt-6 flex items-center gap-2 border border-emerald-500/40 bg-emerald-500/10 p-3.5 text-xs text-emerald-300">
+              <div className="mt-6 flex items-center gap-2 rounded-xl bg-emerald-500/10 p-3.5 text-xs text-emerald-300">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 <span>{profileSuccess}</span>
               </div>
             )}
 
             {profileError && (
-              <div className="mt-6 flex items-center gap-2 border border-red-500/40 bg-red-500/10 p-3.5 text-xs text-red-300">
+              <div className="mt-6 flex items-center gap-2 rounded-xl bg-red-500/10 p-3.5 text-xs text-red-300">
                 <AlertCircle className="h-4 w-4 text-red-400" />
                 <span>{profileError}</span>
               </div>
             )}
 
-            <form onSubmit={handleProfileUpdate} className="mt-8 space-y-6">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <form onSubmit={handleProfileUpdate} className="space-y-4 sm:space-y-5">
+              <div className="rounded-2xl bg-black/20 p-4 sm:p-5">
+                <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#e7a9ff]">Personal details</h3>
+                <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="text-xs uppercase tracking-wider text-white/50">First Name</label>
                   <input
@@ -661,7 +713,7 @@ function DashboardContent() {
                     required
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="mt-2 h-11 w-full border border-white/15 bg-white/[0.03] px-4 text-sm text-white focus:border-[#FF00D4] focus:outline-none"
+                    className="mt-2 h-12 w-full rounded-xl bg-white/[0.045] px-4 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-[#FF00D0]/70"
                   />
                 </div>
                 <div>
@@ -671,35 +723,39 @@ function DashboardContent() {
                     required
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="mt-2 h-11 w-full border border-white/15 bg-white/[0.03] px-4 text-sm text-white focus:border-[#FF00D4] focus:outline-none"
+                    className="mt-2 h-12 w-full rounded-xl bg-white/[0.045] px-4 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-[#FF00D0]/70"
                   />
                 </div>
               </div>
+              </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
+              <div className="rounded-2xl bg-black/20 p-4 sm:p-5">
+                <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#c5a5ff]">Contact details</h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
                   <label className="text-xs uppercase tracking-wider text-white/50">Email Address (Read-only)</label>
                   <input
                     type="email"
                     disabled
                     value={user.email}
-                    className="mt-2 h-11 w-full border border-white/10 bg-white/[0.01] px-4 text-sm text-white/40 cursor-not-allowed"
+                    className="mt-2 h-12 w-full rounded-xl bg-white/[0.025] px-4 text-sm text-white/40 cursor-not-allowed"
                   />
                 </div>
-                <div>
+                  <div>
                   <label className="text-xs uppercase tracking-wider text-white/50">Phone Number</label>
                   <input
                     type="tel"
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="mt-2 h-11 w-full border border-white/15 bg-white/[0.03] px-4 text-sm text-white focus:border-[#FF00D4] focus:outline-none"
+                    className="mt-2 h-12 w-full rounded-xl bg-white/[0.045] px-4 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-[#FF00D0]/70"
                   />
+                  </div>
                 </div>
               </div>
 
-              <div className="border-t border-white/10 pt-6">
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-[#8B5CFF] mb-4">
+              <div className="rounded-2xl bg-black/20 p-4 sm:p-5">
+                <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#c5a5ff]">
                   Academic / Organizational Affiliation
                 </h3>
 
@@ -711,7 +767,7 @@ function DashboardContent() {
                       placeholder="e.g. Lovely Professional University"
                       value={institution}
                       onChange={(e) => setInstitution(e.target.value)}
-                      className="mt-2 h-11 w-full border border-white/15 bg-white/[0.03] px-4 text-sm text-white focus:border-[#FF00D4] focus:outline-none"
+                      className="mt-2 h-12 w-full rounded-xl bg-white/[0.045] px-4 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-[#FF00D0]/70"
                     />
                   </div>
 
@@ -723,7 +779,7 @@ function DashboardContent() {
                         placeholder="e.g. B.Tech"
                         value={degree}
                         onChange={(e) => setDegree(e.target.value)}
-                        className="mt-2 h-11 w-full border border-white/15 bg-white/[0.03] px-4 text-sm text-white focus:border-[#FF00D4] focus:outline-none"
+                        className="mt-2 h-12 w-full rounded-xl bg-white/[0.045] px-4 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-[#FF00D0]/70"
                       />
                     </div>
                     <div>
@@ -733,7 +789,7 @@ function DashboardContent() {
                         placeholder="e.g. Computer Science"
                         value={department}
                         onChange={(e) => setDepartment(e.target.value)}
-                        className="mt-2 h-11 w-full border border-white/15 bg-white/[0.03] px-4 text-sm text-white focus:border-[#FF00D4] focus:outline-none"
+                        className="mt-2 h-12 w-full rounded-xl bg-white/[0.045] px-4 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-[#FF00D0]/70"
                       />
                     </div>
                     <div>
@@ -743,15 +799,15 @@ function DashboardContent() {
                         placeholder="e.g. 2027"
                         value={graduationYear}
                         onChange={(e) => setGraduationYear(e.target.value)}
-                        className="mt-2 h-11 w-full border border-white/15 bg-white/[0.03] px-4 text-sm text-white focus:border-[#FF00D4] focus:outline-none"
+                        className="mt-2 h-12 w-full rounded-xl bg-white/[0.045] px-4 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-[#FF00D0]/70"
                       />
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="border-t border-white/10 pt-6">
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-[#FF2D87] mb-4">
+              <div className="rounded-2xl bg-black/20 p-4 sm:p-5">
+                <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#e7a9ff]">
                   Public Profiles & Social Links
                 </h3>
 
@@ -763,7 +819,7 @@ function DashboardContent() {
                       placeholder="https://linkedin.com/in/username"
                       value={linkedin}
                       onChange={(e) => setLinkedin(e.target.value)}
-                      className="mt-2 h-11 w-full border border-white/15 bg-white/[0.03] px-4 text-sm text-white focus:border-[#FF00D4] focus:outline-none"
+                      className="mt-2 h-12 w-full rounded-xl bg-white/[0.045] px-4 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-[#FF00D0]/70"
                     />
                   </div>
                   <div>
@@ -773,17 +829,17 @@ function DashboardContent() {
                       placeholder="https://github.com/username"
                       value={github}
                       onChange={(e) => setGithub(e.target.value)}
-                      className="mt-2 h-11 w-full border border-white/15 bg-white/[0.03] px-4 text-sm text-white focus:border-[#FF00D4] focus:outline-none"
+                      className="mt-2 h-12 w-full rounded-xl bg-white/[0.045] px-4 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-[#FF00D0]/70"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end pt-6 border-t border-white/10">
+              <div className="flex justify-stretch pt-2 sm:justify-end">
                 <button
                   type="submit"
                   disabled={savingProfile}
-                  className="flex h-11 items-center gap-2 bg-linear-to-r from-[#FF00D4] to-[#702cff] px-8 text-xs font-semibold uppercase tracking-wider text-white shadow-[0_0_20px_rgba(255,0,212,0.25)] hover:opacity-95 disabled:opacity-50"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-[#FF00D4] to-[#702cff] px-8 text-xs font-semibold uppercase tracking-wider text-white shadow-[0_0_20px_rgba(255,0,212,0.18)] transition hover:opacity-95 disabled:opacity-50 sm:w-auto"
                 >
                   <Save className="h-4 w-4" />
                   <span>{savingProfile ? "Saving Changes..." : "Save Profile"}</span>
@@ -793,74 +849,13 @@ function DashboardContent() {
           </div>
         )}
 
-        {activeTab === "guide" && (
-          <div className="mt-8 space-y-8">
-            <div className="border border-white/10 bg-white/[0.02] p-8">
-              <h2 className="text-2xl font-light tracking-tight">Campus & Venue Locations</h2>
-              <p className="mt-1 text-xs text-white/50">
-                All festival stages, labs, and hackathon venues are located across LPU campus with direct shuttle and signage.
-              </p>
-
-              {loadingVenues ? (
-                <div className="mt-12 flex flex-col items-center justify-center py-16 text-white/50">
-                  <div className="h-7 w-7 animate-spin rounded-full border-2 border-white/10 border-t-[#FF00D4]" />
-                  <p className="mt-4 text-xs tracking-widest uppercase">Loading venue locations...</p>
-                </div>
-              ) : venues.length === 0 ? (
-                <div className="mt-8 flex flex-col items-center justify-center border border-white/10 bg-white/[0.01] py-16 text-center">
-                  <MapPin className="h-10 w-10 text-white/20" />
-                  <h3 className="mt-4 text-base font-medium text-white">Festival Venue Guide Coming Soon</h3>
-                  <p className="mt-1 max-w-sm text-xs text-white/50">
-                    Stage locations, building halls, and interactive lab maps are being finalized and will appear here.
-                  </p>
-                </div>
-              ) : (
-                <div className="mt-8 grid gap-6 md:grid-cols-2">
-                  {venues.map((v) => (
-                    <div key={v.id} className="border border-white/10 bg-black/40 p-6">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-[#FF00D4]">
-                          {v.building} {v.floor ? `· ${v.floor}` : ""} {v.room || v.room_number ? `· ${v.room || v.room_number}` : ""}
-                        </span>
-                        {v.capacity ? (
-                          <span className="text-[10px] text-white/40">Capacity: {v.capacity}</span>
-                        ) : null}
-                      </div>
-                      <h3 className="mt-2 text-lg font-medium text-white">
-                        {v.name}
-                      </h3>
-                      {v.description && (
-                        <p className="mt-2 text-xs leading-relaxed text-white/50">
-                          {v.description}
-                        </p>
-                      )}
-                      {v.amenities && v.amenities.length > 0 && (
-                        <div className="mt-4 flex flex-wrap gap-1.5">
-                          {v.amenities.map((amenity) => (
-                            <span
-                              key={amenity}
-                              className="border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] uppercase tracking-wider text-white/60"
-                            >
-                              {amenity}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {selectedTicket && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-2 backdrop-blur-md sm:items-center sm:p-4"
             onClick={() => setSelectedTicket(null)}
           >
             <div
-              className="relative max-h-[90vh] w-full max-w-md overflow-y-auto border border-[#FF00D4] bg-[#0c0818] p-8 text-center shadow-[0_0_60px_rgba(255,0,212,0.35)]"
+              className="relative max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-[#100c14] p-5 text-center shadow-[0_0_60px_rgba(255,0,212,0.2)] sm:max-h-[90vh] sm:rounded-3xl sm:p-8"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -881,7 +876,9 @@ function DashboardContent() {
               </p>
 
               <div className="my-8 flex justify-center">
-                <QrCode value={selectedTicket.ticket_code} size={220} />
+                <div className="rounded-2xl bg-white p-3">
+                  <QrCode value={selectedTicket.ticket_code} size={200} />
+                </div>
               </div>
 
               <div className="space-y-2 border-y border-white/10 py-4 text-left text-xs text-white/60">
@@ -905,7 +902,7 @@ function DashboardContent() {
                 <button
                   type="button"
                   onClick={() => handleCopyTicketCode(selectedTicket.ticket_code)}
-                  className="flex-1 flex h-11 items-center justify-center gap-2 border border-white/20 text-xs uppercase tracking-wider hover:border-white text-white"
+                  className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-white/[0.08] text-xs uppercase tracking-wider text-white transition hover:bg-white/15"
                 >
                   {copiedCode ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
                   <span>{copiedCode ? "Copied!" : "Copy Code"}</span>
@@ -913,7 +910,7 @@ function DashboardContent() {
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="flex h-11 items-center justify-center gap-2 border border-[#FF00D4] bg-[#FF00D4]/20 px-5 text-xs uppercase tracking-wider text-white hover:bg-[#FF00D4]/30"
+                  className="flex h-11 items-center justify-center gap-2 rounded-full bg-[#FF00D4] px-5 text-xs uppercase tracking-wider text-white transition hover:bg-[#FF2D87]"
                 >
                   <Download className="h-4 w-4" />
                   <span>Print</span>

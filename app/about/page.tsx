@@ -92,7 +92,7 @@ export default function AboutPage() {
 
           <div className="mt-16 flex flex-col gap-4 border-t border-white/20 pt-5 text-xs tracking-[0.12em] text-white/55 sm:flex-row sm:items-center sm:justify-between">
             <span>AWS STUDENT BUILDER GROUP · LPU</span>
-            <span>30 NOV - 04 DEC 2026</span>
+            <span>02 DEC - 04 DEC 2026</span>
             <span>PHAGWARA, PUNJAB</span>
           </div>
         </div>
@@ -238,7 +238,7 @@ export default function AboutPage() {
 
         <div className="relative mx-auto max-w-[1400px] text-center">
           <p className="mb-8 text-xs tracking-[0.2em] text-[#FF2D87] sm:text-sm">
-            30 NOV - 04 DEC 2026
+            02 DEC - 04 DEC 2026
           </p>
 
           <h2 className="text-[clamp(3.5rem,10vw,9rem)] font-extrabold leading-[0.82] tracking-[-0.085em]">

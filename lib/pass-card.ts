@@ -63,7 +63,7 @@ export function renderPassCard({ category, holder, ticketCode }: PassCardInput) 
   accentBar(f, 470)
   f.fillStyle = "rgba(255,255,255,0.65)"
   f.font = `400 28px ${font}`
-  f.fillText("30 Nov – 04 Dec 2026", 60, 540)
+  f.fillText("02 Dec - 04 Dec 2026", 60, 540)
   f.fillText("Lovely Professional University", 60, 584)
 
   f.fillStyle = "rgba(255,255,255,0.45)"
