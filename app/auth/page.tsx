@@ -146,7 +146,7 @@ function AuthForm() {
   };
 
   const inputClass =
-    "w-full bg-transparent py-4 text-base text-white placeholder-white/25 outline-none transition-colors focus:placeholder-white/15";
+    "w-full bg-transparent py-3.5 text-base text-white placeholder-white/25 outline-none transition-colors focus:placeholder-white/15 sm:py-4";
 
   const labelClass =
     "mb-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45";
@@ -154,33 +154,32 @@ function AuthForm() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050505] text-white">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -left-40 top-0 h-[600px] w-[600px] rounded-full bg-[#6C00FF]/15 blur-[150px]" />
-        <div className="absolute -right-40 bottom-0 h-[600px] w-[600px] rounded-full bg-[#FF00D4]/10 blur-[150px]" />
+        <div className="absolute -left-40 top-0 h-[420px] w-[420px] rounded-full bg-[#6C00FF]/10 blur-[130px] sm:h-[600px] sm:w-[600px] sm:bg-[#6C00FF]/15" />
+        <div className="absolute -right-40 bottom-0 h-[420px] w-[420px] rounded-full bg-[#FF00D4]/8 blur-[130px] sm:h-[600px] sm:w-[600px] sm:bg-[#FF00D4]/10" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,0.2),transparent_50%,rgba(5,5,5,0.3))]" />
       </div>
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-[1700px] flex-col px-6 pb-10 pt-28 sm:px-10 lg:px-16 lg:pt-32">
-        <div className="grid flex-1 items-center gap-16 py-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-24 lg:py-16">
-          <section className="relative">
-            <p className="mb-8 flex items-center gap-3 text-xs font-semibold tracking-[0.22em] text-[#FF2D87]">
-              <span className="h-px w-8 bg-[#FF00D4]" />
+      <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-[1700px] flex-col px-4 pb-6 pt-24 sm:min-h-screen sm:px-10 sm:pb-10 sm:pt-28 lg:px-16 lg:pt-32">
+        <div className="grid flex-1 content-start items-center gap-0 py-2 sm:gap-16 sm:py-12 lg:grid-cols-[1.1fr_0.9fr] lg:content-center lg:gap-24 lg:py-16">
+          <section className="relative order-2 hidden sm:block lg:order-1 lg:py-8">
+            <p className="mb-3 flex items-center gap-2 text-[9px] font-semibold tracking-[0.18em] text-[#FF2D87] sm:mb-8 sm:gap-3 sm:text-xs sm:tracking-[0.22em]">
+              <span className="h-px w-5 bg-[#FF00D4] sm:w-8" />
               YOUR JOURNEY STARTS HERE
             </p>
 
-            <h1 className="text-[clamp(4rem,9vw,9rem)] font-extrabold leading-[0.78] tracking-[-0.09em]">
-              BE PART
-              <br />
-              OF THE
-              <br />
+            <h1 className="text-[clamp(2.55rem,12vw,4.5rem)] font-extrabold leading-[0.82] tracking-[-0.09em] sm:text-[clamp(4rem,9vw,9rem)]">
+              BE PART <span className="sm:hidden">OF THE</span>
+              <br className="hidden sm:block" />
+              <span className="hidden sm:inline">OF THE<br /></span>
               <span className="text-[#FF00D4]">FUTURE.</span>
             </h1>
 
-            <p className="mt-10 max-w-lg text-base leading-8 text-white/55 sm:text-lg">
+            <p className="mt-4 max-w-lg text-xs leading-5 text-white/55 sm:mt-10 sm:text-lg sm:leading-8">
               One community. Five days. Countless possibilities. Create your
               account and get ready to experience Re:Invent Fest.
             </p>
 
-            <div className="mt-16 flex flex-wrap gap-x-12 gap-y-6 border-t border-white/15 pt-7">
+            <div className="mt-5 hidden flex-wrap gap-x-12 gap-y-6 border-t border-white/15 pt-7 sm:flex sm:mt-16">
               <div>
                 <p className="text-2xl font-bold tracking-tight">05</p>
                 <p className="mt-1 text-[10px] tracking-[0.16em] text-white/40">
@@ -209,15 +208,15 @@ function AuthForm() {
             </div>
           </section>
 
-          <section className="relative mx-auto w-full max-w-[520px] lg:ml-auto">
-            <div className="mb-12">
-              <p className="mb-5 text-xs font-semibold tracking-[0.2em] text-[#FF2D87]">
+          <section className="relative order-1 mx-auto w-full max-w-[520px] lg:order-2 lg:ml-auto">
+            <div className="mb-5 sm:mb-12">
+              <p className="mb-2 text-[10px] font-semibold tracking-[0.2em] text-[#FF2D87] sm:mb-5 sm:text-xs">
                 {authMode === "register"
                   ? "GET STARTED"
                   : "GOOD TO HAVE YOU BACK"}
               </p>
 
-              <h2 className="text-4xl font-bold tracking-[-0.06em] sm:text-5xl">
+              <h2 className="text-3xl font-bold tracking-[-0.06em] sm:text-5xl">
                 {authMode === "register" ? (
                   <>
                     Create your
@@ -233,18 +232,18 @@ function AuthForm() {
                 )}
               </h2>
 
-              <p className="mt-5 text-sm leading-7 text-white/45">
+              <p className="mt-2 text-xs leading-5 text-white/45 sm:mt-5 sm:text-sm sm:leading-7">
                 {authMode === "register"
                   ? "A few details and you're ready to go."
                   : "Sign in to continue to your festival experience."}
               </p>
             </div>
 
-            <div className="mb-10 flex border-b border-white/15">
+            <div className="mb-6 flex border-b border-white/15 sm:mb-10">
               <button
                 type="button"
                 onClick={() => switchMode("register")}
-                className={`relative flex-1 pb-4 text-left text-xs font-semibold tracking-[0.15em] transition-colors ${
+                className={`relative flex-1 pb-3 text-left text-[10px] font-semibold tracking-[0.12em] transition-colors sm:pb-4 sm:text-xs sm:tracking-[0.15em] ${
                   authMode === "register"
                     ? "text-[#FF00D4]"
                     : "text-white/35 hover:text-white"
@@ -259,7 +258,7 @@ function AuthForm() {
               <button
                 type="button"
                 onClick={() => switchMode("login")}
-                className={`relative flex-1 pb-4 text-left text-xs font-semibold tracking-[0.15em] transition-colors ${
+                className={`relative flex-1 pb-3 text-left text-[10px] font-semibold tracking-[0.12em] transition-colors sm:pb-4 sm:text-xs sm:tracking-[0.15em] ${
                   authMode === "login"
                     ? "text-[#FF00D4]"
                     : "text-white/35 hover:text-white"
@@ -274,7 +273,7 @@ function AuthForm() {
 
             {statusMessage && (
               <div
-                className={`mb-8 flex items-start gap-3 border p-4 text-xs font-mono ${
+                className={`mb-5 flex items-start gap-3 rounded-xl border p-3 text-xs font-mono sm:mb-8 sm:p-4 ${
                   statusMessage.type === "success"
                     ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-300"
                     : statusMessage.text.toLowerCase().includes("blocked")
@@ -299,10 +298,10 @@ function AuthForm() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-7">
+            <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-7">
               {authMode === "register" && (
                 <>
-                  <div className="grid grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
                     <div className="border-b border-white/20 transition-colors focus-within:border-[#FF00D4]">
                       <label className={labelClass}>First Name *</label>
                       <div className="flex items-center gap-3">
@@ -427,10 +426,22 @@ function AuthForm() {
                 </div>
               </div>
 
+              {authMode === "login" && (
+                <p className="-mt-4 text-right text-xs text-white/45">
+                  Forgot your password?{" "}
+                  <a
+                    href="mailto:awsbuilders@awslpu.in?subject=Password%20Reset%20Request"
+                    className="font-semibold text-white underline transition-colors hover:text-[#FF00D4]"
+                  >
+                    Email us: awsbuilders@awslpu.in
+                  </a>
+                </p>
+              )}
+
               <button
                 type="submit"
                 disabled={loading}
-                className="group flex w-full items-center justify-between bg-[#FF00D4] px-6 py-5 text-sm font-bold tracking-[0.12em] text-black transition-all hover:bg-[#FF2D87] disabled:cursor-not-allowed disabled:opacity-50"
+                className="group flex min-h-12 w-full items-center justify-between rounded-lg bg-[#FF00D4] px-5 py-3.5 text-xs font-bold tracking-[0.12em] text-black transition-all hover:bg-[#FF2D87] disabled:cursor-not-allowed disabled:opacity-50 sm:py-5 sm:text-sm"
               >
                 <span>
                   {loading
@@ -444,7 +455,7 @@ function AuthForm() {
               </button>
             </form>
 
-            <p className="mt-8 text-center text-xs leading-6 text-white/35">
+            <p className="mt-5 text-center text-xs leading-6 text-white/45 sm:mt-8 sm:text-white/35">
               {authMode === "register"
                 ? "Already have an account?"
                 : "New to Re:Invent Fest?"}{" "}

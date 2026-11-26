@@ -2,22 +2,37 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  Compass,
+  Home,
+  Info,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
+  Menu,
+  Mic2,
+  Ticket,
+  X,
+} from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
 
 const navLinks = [
-  { label: "HOME", href: "/" },
-  { label: "EXPERIENCE", href: "/experience" },
-  { label: "SCHEDULE", href: "/schedule" },
-  { label: "SPEAKERS", href: "/speakers" },
-  { label: "TICKETS", href: "/tickets" },
-  { label: "ABOUT", href: "/about" },
+  { label: "Home", href: "/", icon: Home },
+  { label: "Experience", href: "/experience", icon: Compass },
+  { label: "Schedule", href: "/schedule", icon: CalendarDays },
+  { label: "Speakers", href: "/speakers", icon: Mic2 },
+  { label: "Tickets", href: "/tickets", icon: Ticket },
+  { label: "About", href: "/about", icon: Info },
 ];
 
 export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, loading, authenticated, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -27,53 +42,73 @@ export function Navbar() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
+
   const handleLogout = async () => {
     setMenuOpen(false);
     await logout();
     router.push("/");
   };
 
+  const isLinkActive = (href: string) =>
+    href === "/" ? pathname === href : pathname.startsWith(href);
+
   return (
-    <header className="absolute inset-x-0 top-0 z-50">
+    <header className="absolute inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-5 lg:px-10">
       <nav
         aria-label="Main navigation"
-        className="relative mx-auto flex h-18 max-w-[1600px] items-center justify-between border-b border-white/8 px-5 sm:h-22 sm:px-10 lg:px-16"
+        className="relative mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-3 rounded-full border border-white/[0.16] bg-white/[0.055] px-3 shadow-[0_12px_42px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.13)] ring-1 ring-white/[0.04] backdrop-blur-2xl backdrop-saturate-150 sm:h-[4.5rem] sm:gap-5 sm:px-5 lg:px-7"
       >
         <Link
           href="/"
           aria-label="Re:Invent Fest 2026 home"
           onClick={() => setMenuOpen(false)}
-          className="group flex shrink-0 items-center gap-3"
+          className="group flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3"
         >
-          <span className="flex flex-col leading-none">
-            <span className="mb-1 text-[8px] font-medium uppercase tracking-[0.2em] text-white/55 sm:text-[9px] sm:tracking-[0.28em]">
+          <span className="flex min-w-0 flex-col leading-none">
+            <span className="mb-1 hidden text-[8px] font-medium uppercase tracking-[0.2em] text-white/50 sm:block sm:text-[9px] sm:tracking-[0.24em]">
               AWS Student Builder Group
             </span>
-
-            <span className="text-[24px] font-light tracking-[-0.065em] text-white sm:text-[30px]">
+            <span className="truncate text-[19px] font-light tracking-[-0.065em] text-white sm:text-[25px]">
               re<span className="text-[#e83cff]">:</span>Invent
             </span>
           </span>
         </Link>
 
-        <div className="hidden items-center gap-7 xl:flex">
+        <div className="hidden items-center gap-0.5 rounded-full border border-white/[0.08] bg-white/[0.045] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-xl xl:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-[10px] font-medium tracking-[0.17em] text-white/65 transition-colors duration-300 hover:text-white"
+              aria-current={isLinkActive(link.href) ? "page" : undefined}
+              className={`rounded-full px-3.5 py-2 text-[10px] font-medium transition-all duration-200 ${
+                isLinkActive(link.href)
+                  ? "bg-white/[0.13] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+                  : "text-white/55 hover:bg-white/[0.06] hover:text-white"
+              }`}
             >
               {link.label}
             </Link>
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <Link
             href="/tickets"
-            className="hidden h-9 items-center justify-center border border-[#FF00D4]/60 bg-linear-to-r from-[#FF00D4]/20 to-[#8B5CFF]/20 px-4 text-[9px] font-semibold uppercase tracking-[0.15em] text-white transition-all hover:border-[#FF2D87] hover:shadow-[0_0_20px_rgba(255,0,212,0.25)] md:inline-flex lg:h-10 lg:px-5 lg:text-[10px]"
+            aria-label="Get tickets"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#ff2db2] to-[#8b5cff] px-3.5 text-[9px] font-semibold text-white shadow-[0_5px_20px_rgba(255,0,212,0.18)] transition-all hover:-translate-y-0.5 hover:shadow-[0_7px_24px_rgba(255,0,212,0.28)] sm:h-10 sm:px-4 sm:text-[10px]"
           >
-            Get Tickets
+            <Ticket className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Get tickets</span>
           </Link>
 
           {!loading && (
@@ -81,15 +116,17 @@ export function Navbar() {
               <>
                 <Link
                   href="/dashboard"
-                  className="inline-flex h-9 items-center justify-center border border-white/25 px-4 text-[9px] font-semibold uppercase tracking-[0.15em] text-white transition-all hover:border-[#ec35ff] hover:shadow-[0_0_24px_rgba(221,45,255,0.22)] sm:h-10 sm:px-6 sm:text-[10px] sm:tracking-[0.17em]"
+                  aria-label="Open dashboard"
+                  className="hidden h-9 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/[0.05] px-4 text-[10px] font-medium text-white transition-all hover:border-white/20 hover:bg-white/10 sm:inline-flex sm:h-10"
                 >
-                  Dashboard
+                  <LayoutDashboard className="h-3.5 w-3.5" />
+                  <span className="hidden 2xl:inline">Dashboard</span>
                 </Link>
 
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="hidden text-[10px] font-semibold uppercase tracking-[0.15em] text-white/55 transition-colors hover:text-white sm:block"
+                  className="hidden rounded-full px-3 py-2 text-[10px] font-medium text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white sm:block"
                 >
                   Logout
                 </button>
@@ -98,16 +135,10 @@ export function Navbar() {
               <Link
                 href="/auth?mode=login"
                 onClick={() => setMenuOpen(false)}
-                className="group relative inline-flex h-9 items-center justify-center overflow-hidden border border-white/25 px-3.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white transition-all duration-300 hover:border-[#ec35ff] hover:shadow-[0_0_24px_rgba(221,45,255,0.22)] sm:h-10 sm:px-6 sm:text-[10px] sm:tracking-[0.17em]"
+                className="hidden h-9 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/[0.05] px-4 text-[10px] font-medium text-white transition-all hover:border-white/20 hover:bg-white/10 sm:inline-flex sm:h-10"
               >
-                <span className="absolute inset-0 -translate-x-full bg-linear-to-r from-[#702cff] to-[#ed28bc] transition-transform duration-300 group-hover:translate-x-0" />
-
-                <span className="relative flex items-center gap-2 sm:gap-3">
-                  Login
-                  <span className="text-sm transition-transform duration-300 group-hover:translate-x-1">
-                    ↗
-                  </span>
-                </span>
+                <LogIn className="h-3.5 w-3.5" />
+                Login
               </Link>
             )
           )}
@@ -118,20 +149,9 @@ export function Navbar() {
             aria-expanded={menuOpen}
             aria-controls="mobile-navigation"
             onClick={() => setMenuOpen((open) => !open)}
-            className="relative z-[70] flex size-9 items-center justify-center border border-white/20 text-white transition-colors hover:border-[#e83cff] xl:hidden"
+            className="relative z-[70] flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-white transition-all hover:border-[#e83cff]/50 hover:bg-white/10 xl:hidden sm:size-10"
           >
-            <span className="flex w-4 flex-col gap-[5px]">
-              <span
-                className={`h-px w-full bg-current transition-transform duration-300 ${
-                  menuOpen ? "translate-y-[3px] rotate-45" : ""
-                }`}
-              />
-              <span
-                className={`h-px w-full bg-current transition-transform duration-300 ${
-                  menuOpen ? "-translate-y-[3px] -rotate-45" : ""
-                }`}
-              />
-            </span>
+            {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
       </nav>
@@ -139,6 +159,7 @@ export function Navbar() {
       <button
         type="button"
         aria-label="Close navigation menu"
+        aria-hidden={!menuOpen}
         tabIndex={menuOpen ? 0 : -1}
         onClick={() => setMenuOpen(false)}
         className={`fixed inset-0 z-[60] bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 xl:hidden ${
@@ -150,88 +171,123 @@ export function Navbar() {
         id="mobile-navigation"
         aria-label="Mobile navigation"
         aria-hidden={!menuOpen}
-        className={`fixed right-0 top-0 z-[65] flex h-dvh w-[min(82vw,360px)] flex-col border-l border-white/10 bg-[#08060c]/90 shadow-[-20px_0_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl transition-transform duration-300 ease-out xl:hidden ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed inset-x-3 top-[4.75rem] z-[65] mx-auto flex max-h-[calc(100dvh-5.5rem)] max-w-lg flex-col overflow-y-auto rounded-[1.75rem] border border-white/[0.16] bg-white/[0.07] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.05] backdrop-blur-3xl backdrop-saturate-150 transition-all duration-300 ease-out xl:hidden sm:top-[6rem] sm:p-5 ${
+          menuOpen
+            ? "translate-y-0 scale-100 opacity-100"
+            : "pointer-events-none -translate-y-2 scale-[0.98] opacity-0"
         }`}
       >
-        <div className="flex h-18 shrink-0 items-center justify-between border-b border-white/10 px-6">
-          <span className="text-xs font-medium uppercase tracking-[0.2em] text-white/50">
-            Navigation
-          </span>
-
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#c5a5ff]">
+              AWS Student Builder Group
+            </p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight text-white">
+              {authenticated && user?.first_name
+                ? `Hi, ${user.first_name}`
+                : "Explore re:Invent"}
+            </h2>
+          </div>
           <button
             type="button"
             aria-label="Close navigation menu"
             onClick={() => setMenuOpen(false)}
             tabIndex={menuOpen ? 0 : -1}
-            className="flex size-9 items-center justify-center border border-white/15 text-xl text-white/80 transition-colors hover:border-[#FF00D4] hover:text-white"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-white/75 transition-colors hover:border-white/25 hover:text-white"
           >
-            ×
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col px-6 pt-6 overflow-y-auto">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              tabIndex={menuOpen ? 0 : -1}
-              onClick={() => setMenuOpen(false)}
-              className="group flex items-center justify-between border-b border-white/10 py-4 text-sm font-medium tracking-[0.12em] text-white/70 transition-colors hover:text-white"
-            >
-              <span>{link.label}</span>
-              <span className="text-xs text-[#FF2D87] transition-transform duration-300 group-hover:translate-x-1">
-                ↗
-              </span>
-            </Link>
-          ))}
+        <div className="grid grid-cols-2 gap-2">
+          {navLinks.filter((link) => link.href !== "/tickets").map((link) => {
+            const Icon = link.icon;
+            const active = isLinkActive(link.href);
 
-          <Link
-            href="/tickets"
-            tabIndex={menuOpen ? 0 : -1}
-            onClick={() => setMenuOpen(false)}
-            className="mt-6 flex h-11 items-center justify-between border border-[#FF00D4]/70 bg-linear-to-r from-[#FF00D4]/20 to-[#8B5CFF]/20 px-4 text-[10px] font-semibold uppercase tracking-[0.17em] text-white transition-colors hover:border-[#FF2D87]"
-          >
-            Get Tickets
-            <span className="text-[#FF2D87]">↗</span>
-          </Link>
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                tabIndex={menuOpen ? 0 : -1}
+                onClick={() => setMenuOpen(false)}
+                aria-current={active ? "page" : undefined}
+                className={`group flex min-h-14 items-center gap-2.5 rounded-2xl border px-3 py-2.5 text-left text-xs font-medium transition-all ${
+                  active
+                    ? "border-[#ed5cda]/30 bg-[#ed5cda]/10 text-white"
+                    : "border-white/[0.09] bg-white/[0.04] text-white/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/20 hover:bg-white/[0.075] hover:text-white"
+                }`}
+              >
+                <span
+                  className={`flex size-8 shrink-0 items-center justify-center rounded-xl ${
+                    active
+                      ? "bg-[#ed5cda]/15 text-[#ff9ee9]"
+                      : "bg-white/[0.05] text-white/55"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="min-w-0 flex-1 truncate">{link.label}</span>
+                <span className="text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70">
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </span>
+              </Link>
+            );
+          })}
+        </div>
 
-          {!loading && (
-            authenticated ? (
-              <>
+        <Link
+          href="/tickets"
+          tabIndex={menuOpen ? 0 : -1}
+          onClick={() => setMenuOpen(false)}
+          className="mt-3 flex h-12 items-center justify-between rounded-full bg-gradient-to-r from-[#ff2db2] to-[#8b5cff] px-5 text-xs font-semibold text-white shadow-[0_8px_24px_rgba(255,0,212,0.18)] transition hover:brightness-110"
+        >
+          <span className="flex items-center gap-2">
+            <Ticket className="h-4 w-4" />
+            Get your tickets
+          </span>
+          <ArrowUpRight className="h-4 w-4" />
+        </Link>
+
+        {!loading && (
+          <div className="mt-4 border-t border-white/[0.08] pt-4">
+            <p className="mb-2 px-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/35">
+              {authenticated ? "Your account" : "Already registered?"}
+            </p>
+            {authenticated ? (
+              <div className="grid grid-cols-2 gap-2">
                 <Link
                   href="/dashboard"
                   tabIndex={menuOpen ? 0 : -1}
                   onClick={() => setMenuOpen(false)}
-                  className="mt-4 flex h-11 items-center justify-between border border-white/20 bg-white/[0.04] px-4 text-[10px] font-semibold uppercase tracking-[0.17em] text-white transition-colors hover:border-[#FF2D87]"
+                  aria-current={pathname.startsWith("/dashboard") ? "page" : undefined}
+                  className="flex h-11 items-center justify-center gap-2 rounded-full border border-white/[0.13] bg-white/[0.06] px-3 text-[10px] font-medium text-white/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-xl transition hover:bg-white/10"
                 >
-                  My Dashboard
-                  <span className="text-[#FF2D87]">↗</span>
+                  <LayoutDashboard className="h-3.5 w-3.5" />
+                  Dashboard
                 </Link>
-
                 <button
                   type="button"
                   tabIndex={menuOpen ? 0 : -1}
                   onClick={handleLogout}
-                  className="mt-4 flex h-10 items-center justify-between border border-white/15 px-4 text-[10px] font-semibold uppercase tracking-[0.17em] text-white/60 transition-colors hover:border-white/40 hover:text-white"
+                  className="flex h-11 items-center justify-center gap-2 rounded-full border border-white/[0.1] bg-white/[0.025] px-3 text-[10px] font-medium text-white/65 backdrop-blur-xl transition hover:border-white/20 hover:bg-white/[0.06] hover:text-white"
                 >
-                  Logout
-                  <span>→</span>
+                  <LogOut className="h-3.5 w-3.5" />
+                  Log out
                 </button>
-              </>
+              </div>
             ) : (
               <Link
                 href="/auth?mode=login"
                 tabIndex={menuOpen ? 0 : -1}
                 onClick={() => setMenuOpen(false)}
-                className="mt-4 flex h-11 items-center justify-between border border-white/20 px-4 text-[10px] font-semibold uppercase tracking-[0.17em] text-white/80 transition-colors hover:text-white"
+                className="flex h-11 items-center justify-center gap-2 rounded-full border border-white/[0.13] bg-white/[0.06] text-[10px] font-medium text-white/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-xl transition hover:bg-white/10 hover:text-white"
               >
-                Attendee Sign In
-                <span className="text-[#FF2D87]">↗</span>
+                <LogIn className="h-3.5 w-3.5" />
+                Sign in to your attendee account
               </Link>
-            )
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </aside>
     </header>
   );
