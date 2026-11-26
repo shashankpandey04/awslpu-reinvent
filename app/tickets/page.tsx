@@ -541,9 +541,17 @@ export default function TicketsPage() {
                 )}
               </h1>
             </div>
-            <div className="max-w-md text-[10px] leading-relaxed text-white/55 sm:text-right sm:text-sm">
+            <div className="w-full max-w-md text-left text-xs leading-relaxed text-white/65 sm:text-right sm:text-sm">
               {isBlackFridaySaleLive ? (
-                <p>Prices shown are current event prices. Any eligible coupon savings are confirmed before payment.</p>
+                <div className="rounded-2xl border border-[#f4c778]/25 bg-[#f4c778]/[0.08] p-3.5 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0">
+                  <p className="flex items-start gap-2 text-sm font-semibold leading-snug text-[#ffe0a6] sm:justify-end sm:text-sm">
+                    <TicketIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#f4c778] sm:hidden" />
+                    <span>
+                      Find your nearest AWS Registration Desk in LPU CSE Blocks for{" "}
+                      <span className="font-extrabold text-white">BLACK FRIDAY Code</span>
+                    </span>
+                  </p>
+                </div>
               ) : (
                 <>
                   <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#e7a9ff]">Sale begins in IST (GMT+5:30)</p>

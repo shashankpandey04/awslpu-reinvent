@@ -17,14 +17,14 @@ export function BlackFridayPopup() {
       const storedVisits = Number(window.localStorage.getItem(POPUP_VISIT_STORAGE_KEY) ?? "0")
       const visitCount = Number.isSafeInteger(storedVisits) && storedVisits >= 0 ? storedVisits + 1 : 1
       window.localStorage.setItem(POPUP_VISIT_STORAGE_KEY, String(visitCount))
-      shouldShowPopupRef.current = visitCount % 3 === 0
+      shouldShowPopupRef.current = visitCount === 1 || visitCount % 3 === 0
     }
 
     if (!shouldShowPopupRef.current) return
 
     const timeout = window.setTimeout(() => {
       setIsOpen(true)
-    }, 1800)
+    }, 1000)
 
     return () => window.clearTimeout(timeout)
   }, [])
