@@ -427,6 +427,18 @@ function AuthForm() {
                 </div>
               </div>
 
+              {authMode === "login" && (
+                <p className="-mt-4 text-right text-xs text-white/45">
+                  Forgot your password?{" "}
+                  <a
+                    href="mailto:awsbuilders@awslpu.in"
+                    className="font-semibold text-white underline transition-colors hover:text-[#FF00D4]"
+                  >
+                    Email us: awsbuilders@awslpu.in
+                  </a>
+                </p>
+              )}
+
               <button
                 type="submit"
                 disabled={loading}
