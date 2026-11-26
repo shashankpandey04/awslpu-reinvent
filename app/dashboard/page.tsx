@@ -26,6 +26,7 @@ import {
 } from "lucide-react"
 import { useAuth } from "@/providers/auth-provider"
 import { QrCode } from "@/components/qr-code"
+import { PassLanyard } from "@/components/pass-lanyard"
 import type { Ticket } from "@/types/ticketing"
 
 function DashboardContent() {
@@ -290,8 +291,18 @@ function DashboardContent() {
 
         {activeTab === "overview" && (
           <div className="space-y-4 sm:space-y-6">
-            <div className="grid gap-4 lg:grid-cols-[1.45fr_0.85fr]">
-              <div className="order-2 relative overflow-hidden rounded-[1.75rem] bg-[#17121f] p-4 sm:rounded-[2rem] sm:p-8 lg:p-10">
+            <div className={`grid gap-4 ${tickets.length > 0 ? "lg:grid-cols-[0.9fr_1.1fr]" : ""}`}>
+              {tickets.length > 0 && (
+                <div className="order-1 h-80 w-full sm:h-[340px] lg:h-[320px]">
+                  <PassLanyard
+                    category={tickets[0].category_name}
+                    holder={fullName}
+                    ticketCode={tickets[0].ticket_code}
+                  />
+                </div>
+              )}
+
+              <div className={`${tickets.length > 0 ? "order-2" : ""} relative overflow-hidden rounded-[1.75rem] bg-[#17121f] p-4 sm:rounded-[2rem] sm:p-8 lg:p-10`}>
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_84%_12%,rgba(207,49,217,0.24),transparent_38%),radial-gradient(ellipse_at_12%_100%,rgba(88,65,191,0.17),transparent_44%)]" />
                 <div className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full border border-white/[0.06]" />
                 <div className="pointer-events-none absolute -right-12 bottom-12 h-48 w-48 rounded-full border border-white/[0.07]" />
@@ -352,104 +363,6 @@ function DashboardContent() {
                 </div>
               </div>
 
-              <div className="order-1 flex flex-col justify-between overflow-hidden rounded-[1.75rem] bg-[#14111a] p-4 ring-1 ring-white/[0.06] sm:rounded-[2rem] sm:p-6">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">At a glance</p>
-                      <h3 className="mt-1 text-lg font-semibold text-white">Your pass</h3>
-                    </div>
-                    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FF00D4]/10 text-[#f28bff]">
-                      <TicketIcon className="h-4 w-4" />
-                    </span>
-                  </div>
-
-                  {loadingTickets ? (
-                    <div className="mt-4 flex min-h-32 items-center justify-center rounded-2xl bg-black/20">
-                      <Loader2 className="h-6 w-6 animate-spin text-[#e7a9ff]" />
-                    </div>
-                  ) : tickets.length > 0 ? (
-                    <div className="mt-4 rounded-2xl bg-black/20 p-3 sm:p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="shrink-0 rounded-xl bg-white p-2">
-                          <QrCode value={tickets[0].ticket_code} size={84} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-semibold uppercase ${
-                            tickets[0].status === "valid"
-                              ? "bg-emerald-400/10 text-emerald-300"
-                              : "bg-white/[0.08] text-white/55"
-                          }`}>
-                            {tickets[0].status}
-                          </span>
-                          <h4 className="mt-2 break-words text-sm font-semibold leading-tight text-white">
-                            {tickets[0].category_name}
-                          </h4>
-                          <p className="mt-1 truncate font-mono text-[9px] text-[#e7a9ff]">
-                            {tickets[0].ticket_code}
-                          </p>
-                          <p className="mt-1.5 flex items-center gap-1.5 text-[10px] text-white/45">
-                            <CalendarDays className="h-3 w-3 shrink-0" />
-                            02 Dec - 04 Dec 2026
-                          </p>
-                        </div>
-                      </div>
-                      <div className="mt-3 flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedTicket(tickets[0])}
-                          className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full bg-white text-[10px] font-semibold text-[#17121f] transition hover:bg-[#f4c4ff]"
-                        >
-                          <QrIcon className="h-3.5 w-3.5" />
-                          View pass
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleCopyTicketCode(tickets[0].ticket_code)}
-                          aria-label="Copy ticket verification code"
-                          className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.08] text-white/70 transition hover:bg-white/[0.14]"
-                        >
-                          {copiedCode ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-                        </button>
-                        {tickets.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => setActiveTab("tickets")}
-                            className="flex h-9 items-center rounded-full bg-white/[0.08] px-3 text-[10px] text-white/75 transition hover:bg-white/[0.14]"
-                          >
-                            All {tickets.length}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="mt-4 flex items-center gap-3 rounded-2xl bg-black/20 p-4">
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FF00D4]/10 text-[#f28bff]">
-                        <TicketIcon className="h-5 w-5" />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-white">Your pass is waiting</p>
-                        <p className="mt-1 text-[10px] leading-relaxed text-white/45">Choose a ticket to save your place.</p>
-                      </div>
-                      <Link
-                        href="/tickets"
-                        aria-label="Browse available passes"
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FF00D4] text-white transition hover:bg-[#FF2D87]"
-                      >
-                        <ArrowUpRight className="h-4 w-4" />
-                      </Link>
-                    </div>
-                  )}
-                </div>
-
-                <Link
-                  href="/tickets"
-                  className="mt-5 flex h-11 items-center justify-between rounded-full bg-[#FF00D4] px-5 text-xs font-semibold text-white transition-all hover:bg-[#FF2D87]"
-                >
-                  <span>{tickets.length > 0 ? "Browse more tickets" : "Browse festival passes"}</span>
-                  <ArrowUpRight className="h-4 w-4 text-white/80" />
-                </Link>
-              </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">

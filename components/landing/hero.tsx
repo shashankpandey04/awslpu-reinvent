@@ -55,13 +55,13 @@ export function Hero() {
             className="reveal reveal-delay-2 mt-7 max-w-xl sm:mt-9"
           >
             <p className="max-w-lg text-sm font-light leading-6 text-white/90 sm:text-base sm:leading-8">
-              Five days of technology, ideas, and building what's next. Join
+              Three days of technology, ideas, and building what's next. Join
               developers, students, and innovators at Lovely Professional
               University.
             </p>
 
             <p className="mt-3 text-sm text-white/70 sm:mt-4">
-              November 30 to December 4, 2026
+              December 2 to December 4, 2026
             </p>
           </div>
 

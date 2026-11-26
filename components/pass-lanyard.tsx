@@ -32,11 +32,11 @@ export function PassLanyard({ category, holder, ticketCode }: PassLanyardProps) 
     <Lanyard
       frontImage={images.front}
       backImage={images.back}
-      finish="holographic"
+      finish="glossy"
       strapColor="#1a0b2e"
       metal="silver"
-      size={0.62}
-      strapLength={0.35}
+      size={0.7}
+      strapLength={0.3}
     />
   )
 }

@@ -90,6 +90,7 @@ export default function TicketsPage() {
   const [loadingCategories, setLoadingCategories] = useState(true)
   const [existingTicket, setExistingTicket] = useState<Ticket | null>(null)
   const [checkingExisting, setCheckingExisting] = useState(false)
+  const [blackFridayRemainingMs, setBlackFridayRemainingMs] = useState<number | null>(null)
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
   const [checkoutStep, setCheckoutStep] = useState<"select" | "review" | "processing" | "success">("select")
@@ -110,6 +111,26 @@ export default function TicketsPage() {
   const [validatingCoupon, setValidatingCoupon] = useState(false)
   const [couponError, setCouponError] = useState<string | null>(null)
   const [couponSuccess, setCouponSuccess] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Use local midnight so the launch date follows the visitor's browser timezone.
+    const saleStartsAt = new Date(2026, 10, 27).getTime()
+    const initialRemainingMs = saleStartsAt - Date.now()
+    if (initialRemainingMs <= 0) {
+      setBlackFridayRemainingMs(0)
+      return
+    }
+
+    setBlackFridayRemainingMs(initialRemainingMs)
+    const updateCountdown = () => {
+      const remainingMs = saleStartsAt - Date.now()
+      setBlackFridayRemainingMs(Math.max(0, remainingMs))
+      if (remainingMs <= 0) window.clearInterval(intervalId)
+    }
+
+    const intervalId = window.setInterval(updateCountdown, 1000)
+    return () => window.clearInterval(intervalId)
+  }, [])
 
   useEffect(() => {
     async function fetchCategories() {
@@ -488,39 +509,63 @@ export default function TicketsPage() {
     const available = totalQty - soldQty - reservedQty
     return Boolean(c.is_sold_out) || totalQty <= 0 || available <= 0
   })
+  const isBlackFridaySaleLive = blackFridayRemainingMs === 0
+  const countdownParts = blackFridayRemainingMs === null ? null : {
+    days: Math.floor(blackFridayRemainingMs / 86_400_000),
+    hours: Math.floor((blackFridayRemainingMs % 86_400_000) / 3_600_000),
+    minutes: Math.floor((blackFridayRemainingMs % 3_600_000) / 60_000),
+    seconds: Math.floor((blackFridayRemainingMs % 60_000) / 1_000)
+  }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#080706] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#050505] text-white">
       <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute left-1/2 top-0 h-[560px] w-[900px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(167,55,33,0.14),transparent_68%)] blur-3xl" />
-        <div className="absolute right-0 top-1/3 h-[420px] w-[420px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(199,133,48,0.07),transparent_68%)] blur-3xl" />
+        <div className="absolute left-1/2 top-0 h-[560px] w-[900px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(108,0,255,0.13),transparent_68%)] blur-3xl" />
+        <div className="absolute right-0 top-1/3 h-[420px] w-[420px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,0,212,0.055),transparent_68%)] blur-3xl" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-[1520px] px-4 pb-28 pt-20 sm:px-8 sm:pt-24 lg:px-12">
-        <section aria-labelledby="black-friday-heading" className="relative mb-5 overflow-hidden rounded-2xl bg-[#14100d] px-5 py-4 sm:px-8 sm:py-5">
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(ellipse_at_right,rgba(218,67,40,0.2),transparent_68%)]" />
-          <div className="relative flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
-            <div>
-              <p className="mb-1 flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#f4b64d] sm:text-[10px]">
-                <Flame className="h-3.5 w-3.5" /> AWS re:Invent Fest 2026 <span className="text-white/25">/</span> Limited-period ticket prices
+      <div className="relative z-10 mx-auto max-w-[1440px] px-4 pb-36 pt-24 sm:px-8 sm:pb-28 sm:pt-28 lg:px-12">
+        <section aria-labelledby="black-friday-heading" className="relative mb-6 overflow-hidden rounded-[1.75rem] border border-white/[0.07] bg-[#121019] px-4 py-5 sm:mb-8 sm:rounded-[2rem] sm:px-7 sm:py-6">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_90%_0%,rgba(207,49,217,0.14),transparent_46%),radial-gradient(ellipse_at_0%_100%,rgba(88,65,191,0.12),transparent_52%)]" />
+          <div className="relative flex flex-col justify-between gap-3 sm:flex-row sm:items-end sm:gap-6">
+            <div className="min-w-0">
+              <p className="mb-1.5 flex items-center gap-1.5 text-[9px] font-medium uppercase tracking-[0.17em] text-[#c5a5ff]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#FF00D4]" />
+                AWS re:Invent Fest 2026 · {isBlackFridaySaleLive ? "Limited-time offer" : "Black Friday · Nov 27"}
               </p>
-              <h1 id="black-friday-heading" className="font-serif text-[clamp(1.8rem,4vw,3.35rem)] font-bold leading-[0.95] tracking-[-0.045em] text-white">
-                BLACK FRIDAY <span className="text-[#ed6545]">TICKET SALE</span>
+              <h1 id="black-friday-heading" className="text-[clamp(1.9rem,8vw,3.5rem)] font-semibold leading-[0.94] tracking-[-0.06em] text-white">
+                {isBlackFridaySaleLive ? (
+                  <>BLACK FRIDAY <span className="text-[#e7a9ff]">TICKET SALE</span></>
+                ) : (
+                  <>BLACK FRIDAY <span className="text-[#e7a9ff]">SALE COMING SOON</span></>
+                )}
               </h1>
             </div>
-            <p className="max-w-sm text-xs leading-relaxed text-white/60 sm:text-right sm:text-sm">
-              Get your event tickets at exclusive prices. Pick your pass; any extra coupon savings are confirmed before payment.
-            </p>
+            <div className="max-w-md text-[10px] leading-relaxed text-white/55 sm:text-right sm:text-sm">
+              {isBlackFridaySaleLive ? (
+                <p>Prices shown are current event prices. Any eligible coupon savings are confirmed before payment.</p>
+              ) : (
+                <>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#e7a9ff]">Sale begins in IST (GMT+5:30)</p>
+                  <p role="timer" aria-live="off" aria-label="Countdown to the Black Friday sale" className="mt-1 font-mono text-sm font-semibold tabular-nums tracking-wide text-white sm:text-base">
+                    {countdownParts
+                      ? `${String(countdownParts.days).padStart(2, "0")}d ${String(countdownParts.hours).padStart(2, "0")}h ${String(countdownParts.minutes).padStart(2, "0")}m ${String(countdownParts.seconds).padStart(2, "0")}s`
+                      : "--d --h --m --s"}
+                  </p>
+                </>
+              )}
+            </div>
           </div>
         </section>
 
-        <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+        <div className="mb-4 flex flex-col justify-between gap-2 sm:mb-5 sm:flex-row sm:items-end">
           <div>
-            <h2 className="text-xl font-medium tracking-tight text-white sm:text-2xl">Choose your pass</h2>
-            <p className="mt-1 text-xs text-white/50">Five days of cloud, builders and big ideas at Lovely Professional University.</p>
+            <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#c5a5ff]">Find your place at the festival</p>
+            <h2 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">Choose your pass</h2>
+            <p className="mt-1 text-[11px] text-white/50 sm:text-xs">Five days of cloud, builders and big ideas at Lovely Professional University.</p>
           </div>
-          <p className="text-[10px] text-white/40 sm:text-right">
-            Prices shown are active event prices. No unverified discounts or countdowns.
+          <p className="text-[9px] text-white/40 sm:text-right sm:text-[10px]">
+            Live availability <span className="mx-1.5 text-white/20">·</span> Prices in INR
           </p>
         </div>
 
@@ -590,7 +635,7 @@ export default function TicketsPage() {
 
             {loadingCategories ? (
               <div className="flex flex-col items-center justify-center py-28 text-white/50">
-                <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/10 border-t-[#ff7656] shadow-[0_0_20px_rgba(240,68,50,0.35)]" />
+                <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/10 border-t-[#e7a9ff]" />
                 <p className="mt-4 font-mono text-xs uppercase tracking-widest text-white/60">
                   Retrieving real-time festival pass inventory...
                 </p>
@@ -607,7 +652,7 @@ export default function TicketsPage() {
               <>
                 <div className="mb-3 flex items-center justify-between text-[11px] text-white/45 md:hidden">
                   <span className="flex items-center gap-1.5">
-                    Swipe to compare passes <ArrowRight className="h-3 w-3 text-[#ff9a70]" />
+                    Swipe to compare passes <ArrowRight className="h-3 w-3 text-[#e7a9ff]" />
                   </span>
                   <span>{categories.length} {categories.length === 1 ? "option" : "options"}</span>
                 </div>
@@ -616,7 +661,7 @@ export default function TicketsPage() {
                   role="region"
                   aria-label="Available tickets. Swipe horizontally to compare pass options."
                   tabIndex={0}
-                  className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-4 pb-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffd178] md:mx-0 md:grid md:grid-cols-2 md:items-stretch md:gap-4 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-3"
+                  className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-4 pb-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e7a9ff] md:mx-0 md:grid md:grid-cols-2 md:items-stretch md:gap-4 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-3"
                 >
                   {categories.map((cat, idx) => {
                     const priceInRupees = cat.price_in_paise / 100
@@ -658,30 +703,30 @@ export default function TicketsPage() {
                     return (
                       <article
                         key={cat.id}
-                        className={`group relative flex min-h-64 w-[calc(100vw-3rem)] max-w-[400px] shrink-0 snap-start flex-col overflow-hidden rounded-[1.35rem] bg-[#12100e] transition-all duration-300 hover:-translate-y-1 md:w-auto md:max-w-none md:shrink ${
+                        className={`group relative flex min-h-64 w-[calc(100vw-3rem)] max-w-[400px] shrink-0 snap-start flex-col overflow-hidden rounded-[1.5rem] bg-[#121019] transition-all duration-200 hover:-translate-y-0.5 md:w-auto md:max-w-none md:shrink ${
                           isSoldOut
                             ? "opacity-75 ring-1 ring-rose-400/25"
                             : isSelected
-                            ? "ring-2 ring-[#ff7656] shadow-[0_18px_55px_rgba(225,74,45,0.16)]"
+                            ? "ring-2 ring-[#FF00D4] shadow-[0_14px_42px_rgba(255,0,212,0.14)]"
                             : isHighlight
-                            ? "ring-1 ring-[#d9ae63]/60 shadow-[0_12px_42px_rgba(195,142,56,0.08)] hover:ring-[#f0c77b]"
-                            : "ring-1 ring-white/10 hover:ring-white/25"
+                            ? "ring-1 ring-[#8B5CFF]/45 shadow-[0_12px_36px_rgba(139,92,255,0.08)] hover:ring-[#c5a5ff]/60"
+                            : "ring-1 ring-white/[0.08] hover:ring-white/20"
                         }`}
                       >
                         <div className={`flex items-center justify-between px-5 py-2.5 ${
                           isSoldOut
-                            ? "bg-rose-950/50 text-rose-200"
+                            ? "bg-rose-950/35 text-rose-200"
                             : isHighlight
-                            ? "bg-[#302313] text-[#f3cf8d]"
+                            ? "bg-[#241a30] text-[#d8c0ff]"
                             : "bg-white/[0.035] text-white/55"
                         }`}>
                           <span className="text-[9px] font-semibold uppercase tracking-[0.18em]">
                             {isSoldOut ? "Pass unavailable" : isHighlight ? "Recommended" : "Re:Invent Fest 2026"}
                           </span>
-                          {!isSoldOut && (
-                            <span className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.13em] text-[#ff9a70]">
-                              <span className="h-1 w-1 rounded-full bg-[#ff7656]" />
-                              Black Friday offer
+                          {!isUnavailable && (
+                            <span className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.13em] text-[#d7aaff]">
+                              <span className="h-1 w-1 rounded-full bg-[#FF00D4]" />
+                              Sale live
                             </span>
                           )}
                         </div>
@@ -700,13 +745,13 @@ export default function TicketsPage() {
                                   Sold out
                                 </span>
                               ) : isHighlight ? (
-                                <span className="shrink-0 rounded-full bg-[#f4b64d]/10 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-[#f4cf90]">
+                                <span className="shrink-0 rounded-full bg-[#8B5CFF]/15 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-[#d8c0ff]">
                                   <Sparkles className="mr-1 inline h-3 w-3" /> Top pick
                                 </span>
                               ) : null}
                             </div>
 
-                            <div className="ticket-description mt-4 hidden flex-1 text-xs leading-relaxed text-white/65 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-4 [&_li]:pl-1 [&_li]:marker:text-[#ff7656] [&_strong]:font-semibold [&_strong]:text-white md:block">
+                            <div className="ticket-description mt-4 hidden flex-1 text-xs leading-relaxed text-white/65 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-4 [&_li]:pl-1 [&_li]:marker:text-[#c5a5ff] [&_strong]:font-semibold [&_strong]:text-white md:block">
                               {cat.description?.trim() ? (
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{cat.description}</ReactMarkdown>
                               ) : (
@@ -715,10 +760,10 @@ export default function TicketsPage() {
                             </div>
 
                             <details className="mt-3 md:hidden">
-                              <summary className="cursor-pointer text-[11px] font-medium text-[#f4c778] marker:text-[#f4c778]">
+                              <summary className="cursor-pointer text-[11px] font-medium text-[#d8c0ff] marker:text-[#d8c0ff]">
                                 View included benefits
                               </summary>
-                              <div className="ticket-description pt-2 text-xs leading-relaxed text-white/65 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-4 [&_li]:pl-1 [&_li]:marker:text-[#ff7656] [&_strong]:font-semibold [&_strong]:text-white">
+                              <div className="ticket-description pt-2 text-xs leading-relaxed text-white/65 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-4 [&_li]:pl-1 [&_li]:marker:text-[#c5a5ff] [&_strong]:font-semibold [&_strong]:text-white">
                                 {cat.description?.trim() ? (
                                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{cat.description}</ReactMarkdown>
                                 ) : (
@@ -728,22 +773,22 @@ export default function TicketsPage() {
                             </details>
 
                             <div className="mt-4 flex items-center gap-2 text-[10px] text-white/45">
-                              <Calendar className="h-3.5 w-3.5 text-[#d9ae63]" />
+                              <Calendar className="h-3.5 w-3.5 text-[#c5a5ff]" />
                               <span>{subStatusText}</span>
                               <span className="ml-auto font-medium text-white/60">{statusText}</span>
                             </div>
                           </div>
 
                           <div className={`relative flex shrink-0 flex-col justify-between gap-4 border-t border-dashed p-5 md:w-44 md:border-l md:border-t-0 sm:p-6 ${
-                            isHighlight ? "border-[#d9ae63]/35 bg-[#1a160f]" : "border-white/15 bg-[#0e0d0b]"
+                            isHighlight ? "border-[#8B5CFF]/30 bg-[#15111c]" : "border-white/15 bg-[#0e0d11]"
                           }`}>
-                            <span aria-hidden="true" className="absolute -top-2 left-1/4 h-4 w-4 rounded-full bg-[#080706] md:left-auto md:-left-2 md:top-1/4" />
-                            <span aria-hidden="true" className="absolute -top-2 right-1/4 h-4 w-4 rounded-full bg-[#080706] md:right-auto md:-left-2 md:top-3/4" />
+                            <span aria-hidden="true" className="absolute -top-2 left-1/4 h-4 w-4 rounded-full bg-[#050505] md:left-auto md:-left-2 md:top-1/4" />
+                            <span aria-hidden="true" className="absolute -top-2 right-1/4 h-4 w-4 rounded-full bg-[#050505] md:right-auto md:-left-2 md:top-3/4" />
 
                             <div>
                               <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/40">Ticket price</p>
                               <p className={`mt-1 whitespace-nowrap text-[2.4rem] font-semibold leading-none tracking-[-0.07em] ${
-                                isSoldOut ? "text-white/45" : isHighlight ? "text-[#f6d79e]" : "text-white"
+                                isSoldOut ? "text-white/45" : isHighlight ? "text-[#e7d5ff]" : "text-white"
                               }`}>
                                 {priceInRupees === 0 ? "FREE" : `₹${priceInRupees.toLocaleString("en-IN")}`}
                               </p>
@@ -769,10 +814,10 @@ export default function TicketsPage() {
                                 type="button"
                                 onClick={() => toggleSelectCategory(cat.id)}
                                 aria-pressed={isSelected}
-                                className={`flex h-11 items-center justify-center gap-2 rounded-full px-4 text-[10px] font-semibold uppercase tracking-[0.12em] transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffd178] ${
+                                className={`flex h-11 items-center justify-center gap-2 rounded-full px-4 text-[10px] font-semibold uppercase tracking-[0.12em] transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e7a9ff] ${
                                   isSelected
-                                    ? "bg-[#f5e9d2] text-[#18110b] hover:bg-white"
-                                    : "bg-[#e75a3b] text-white shadow-[0_6px_20px_rgba(231,90,59,0.18)] hover:bg-[#f1704f]"
+                                      ? "bg-[#f4d9ff] text-[#17121f] hover:bg-white"
+                                      : "bg-[#FF00D4] text-white shadow-[0_6px_20px_rgba(255,0,212,0.18)] hover:bg-[#e83cff]"
                                 }`}
                               >
                                 {isSelected ? <><Check className="h-3.5 w-3.5" /> Selected</> : <>Choose pass <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></>}
@@ -787,16 +832,16 @@ export default function TicketsPage() {
 
                 {/* Pass inclusions */}
                 <section aria-labelledby="included-heading" className="mt-12 border-t border-white/10 py-8">
-                  <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <div className="mb-2 flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-[#ff7656]" />
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-[#ff9a70]">
+                        <Sparkles className="h-4 w-4 text-[#c5a5ff]" />
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#c5a5ff]">
                           Included with your ticket
                         </span>
                       </div>
                       <h2 id="included-heading" className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                        More than a seat. <span className="text-[#ff9a70]">A full festival.</span>
+                        More than a seat. <span className="text-[#e7a9ff]">A full festival.</span>
                       </h2>
                     </div>
                     <p className="max-w-md text-xs text-white/60 leading-relaxed">
@@ -804,26 +849,26 @@ export default function TicketsPage() {
                     </p>
                   </div>
 
-                  <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-5 sm:gap-x-6 sm:grid-cols-2 lg:grid-cols-4">
                     {universalPerks.map((perk, i) => {
                       const Icon = perk.icon
                       return (
                         <div
                           key={i}
-                          className="group"
+                          className="group min-w-0"
                         >
                           <div className="mb-3 flex items-center gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.06] text-[#ff9a70] transition group-hover:bg-[#ef4938]/20">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#8B5CFF]/10 text-[#c5a5ff] transition group-hover:bg-[#8B5CFF]/20">
                               <Icon className="h-4 w-4" />
                             </div>
-                            <span className="text-[9px] uppercase tracking-wider text-white/40">
+                            <span className="min-w-0 truncate text-[8px] uppercase tracking-wide text-white/40 sm:text-[9px] sm:tracking-wider">
                               {perk.tag}
                             </span>
                           </div>
-                          <h4 className="text-sm font-semibold text-white transition group-hover:text-[#ff9a70]">
+                          <h4 className="text-xs font-semibold leading-snug text-white transition group-hover:text-[#e7a9ff] sm:text-sm">
                             {perk.title}
                           </h4>
-                          <p className="mt-1.5 text-xs text-white/55 leading-relaxed">
+                          <p className="mt-1.5 text-[10px] leading-relaxed text-white/55 sm:text-xs">
                             {perk.description}
                           </p>
                         </div>
@@ -838,20 +883,21 @@ export default function TicketsPage() {
             {selectedCategory && !existingTicket && (
               <aside
                 aria-label="Checkout action bar"
-                className="fixed inset-x-3 bottom-3 z-40 mx-auto max-w-3xl rounded-2xl bg-[#17120e]/95 p-4 shadow-[0_12px_50px_rgba(0,0,0,0.55)] ring-1 ring-[#ff7656]/45 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-300 sm:inset-x-4 sm:bottom-5 sm:p-5 sm:px-8"
+                className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-3xl rounded-3xl border border-white/[0.1] bg-[#100c18]/95 p-4 shadow-[0_12px_50px_rgba(0,0,0,0.55)] ring-1 ring-[#FF00D4]/25 backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-4 duration-300 sm:inset-x-4 sm:bottom-5 sm:p-5 sm:px-8"
               >
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-[#ff7656] animate-pulse" />
-                      <p className="text-[10px] font-mono uppercase tracking-wider text-[#ff9a70] sm:text-xs">
-                        1 Pass Selected: <span className="text-white font-semibold">{selectedCategory.name}</span>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#FF00D4]" />
+                      <p className="truncate text-[9px] font-medium uppercase tracking-wide text-[#e7a9ff] sm:text-xs sm:tracking-wider">
+                        <span className="hidden sm:inline">1 Pass Selected: </span>
+                        <span className="text-white font-semibold">{selectedCategory.name}</span>
                       </p>
                     </div>
-                    <p className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
+                    <p className="mt-1 whitespace-nowrap text-xl font-semibold text-white sm:text-3xl">
                       {totalAmount === 0 ? "FREE" : `₹${totalAmount.toLocaleString("en-IN")}`}{" "}
-                      <span className="text-xs uppercase text-white/40 tracking-widest font-sans">
-                        INR / Total
+                      <span className="text-[9px] font-sans uppercase tracking-wider text-white/40 sm:text-xs sm:tracking-widest">
+                        INR
                       </span>
                       {appliedCoupon && (
                         <span className="ml-2 text-xs font-mono text-emerald-400 font-normal">
@@ -861,7 +907,7 @@ export default function TicketsPage() {
                     </p>
                   </div>
 
-                  <div className="flex min-w-0 items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setSelectedCategoryId(null)}
@@ -875,9 +921,10 @@ export default function TicketsPage() {
                       type="button"
                       onClick={handleStartCheckout}
                       disabled={checkingExisting || !!existingTicket}
-                      className="flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-[#e75a3b] px-4 text-[10px] font-bold uppercase tracking-[0.1em] text-white transition hover:bg-[#f1704f] disabled:opacity-40 sm:h-12 sm:flex-none sm:gap-3 sm:px-8 sm:text-xs"
+                      className="flex h-11 min-w-0 items-center justify-center gap-2 rounded-full bg-[#FF00D4] px-4 text-[9px] font-semibold uppercase tracking-[0.08em] text-white transition hover:bg-[#e83cff] disabled:opacity-40 sm:h-12 sm:flex-none sm:gap-3 sm:px-8 sm:text-xs sm:tracking-[0.1em]"
                     >
-                      <span>Proceed to Review</span>
+                      <span className="sm:hidden">Review</span>
+                      <span className="hidden sm:inline">Proceed to Review</span>
                       <ArrowRight className="h-4 w-4" />
                     </button>
                   </div>
@@ -889,10 +936,10 @@ export default function TicketsPage() {
 
         {/* STEP 2: Order Review & Attendee Verification */}
         {checkoutStep === "review" && selectedCategory && (
-          <div className="mx-auto mt-8 max-w-3xl rounded-[1.5rem] bg-[#14110e] p-5 sm:p-8">
-            <div className="flex items-center justify-between border-b border-white/10 pb-5">
+          <div className="mx-auto mt-5 max-w-3xl rounded-[1.75rem] border border-white/[0.08] bg-[#121019] p-4 sm:mt-8 sm:p-8">
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-5">
               <div>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#ff9a70]">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#c5a5ff]">
                   Your pass
                 </span>
                 <h2 className="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
@@ -902,14 +949,14 @@ export default function TicketsPage() {
               <button
                 type="button"
                 onClick={() => setCheckoutStep("select")}
-                className="rounded-full bg-white/[0.06] px-4 py-2 text-xs text-white/65 transition hover:bg-white/10 hover:text-white"
+                className="shrink-0 rounded-full bg-white/[0.06] px-3 py-2 text-[10px] text-white/65 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-xs"
               >
                 ← Change Pass
               </button>
             </div>
 
             <div className="mt-6 space-y-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4 text-sm">
+              <div className="flex flex-col gap-2 border-b border-white/10 pb-4 text-sm sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-semibold text-white">{selectedCategory.name}</p>
                   <p className="text-xs text-white/50 font-sans">
@@ -921,18 +968,18 @@ export default function TicketsPage() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between pt-2 text-xs text-white/60">
+              <div className="flex items-center justify-between gap-3 pt-2 text-xs text-white/60">
                 <span>Pass Allocation</span>
                 <span className="text-white">1 Ticket (Single Attendee)</span>
               </div>
-              <div className="flex items-center justify-between text-xs text-white/60">
+              <div className="flex items-center justify-between gap-3 text-xs text-white/60">
                 <span>GST & Conference Amenities</span>
                 <span className="text-emerald-400">Included</span>
               </div>
 
               {/* Coupon Discount breakdown line if applied */}
               {appliedCoupon && (
-                <div className="flex items-center justify-between rounded-lg bg-emerald-500/10 px-3 py-2 text-xs text-emerald-400">
+                <div className="flex flex-col gap-1 rounded-lg bg-emerald-500/10 px-3 py-2 text-xs text-emerald-400 sm:flex-row sm:items-center sm:justify-between">
                   <span className="flex items-center gap-1.5 font-mono">
                     <Tag className="h-3.5 w-3.5" />
                     Coupon Discount ({appliedCoupon.code} - {appliedCoupon.discount_percent}% OFF)
@@ -943,7 +990,7 @@ export default function TicketsPage() {
                 </div>
               )}
 
-              <div className="flex items-center justify-between border-t border-white/15 pt-5 text-lg text-white sm:text-xl">
+              <div className="flex flex-col gap-3 border-t border-white/15 pt-5 text-lg text-white sm:flex-row sm:items-center sm:justify-between sm:text-xl">
                 <div>
                   <span>Total Amount Due</span>
                   {appliedCoupon && (
@@ -952,13 +999,13 @@ export default function TicketsPage() {
                     </span>
                   )}
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   {appliedCoupon && (
                     <span className="block text-xs line-through text-white/40 font-mono">
                       ₹{unitPrice.toLocaleString("en-IN")} INR
                     </span>
                   )}
-                  <span className="text-3xl font-semibold text-[#ff7656]">
+                  <span className="text-3xl font-semibold text-[#e7a9ff]">
                     {totalAmount === 0 ? "FREE" : `₹${totalAmount.toLocaleString("en-IN")}`}{" "}
                     <span className="text-xs text-white/50 uppercase font-sans">INR</span>
                   </span>
@@ -967,21 +1014,21 @@ export default function TicketsPage() {
             </div>
 
             {/* Promo / Coupon Code Section */}
-            <div className="mt-6 rounded-xl bg-black/25 p-4 sm:p-5">
-              <div className="flex items-center justify-between mb-3">
-                <label htmlFor="coupon-code" className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#ff9a70]">
+            <div className="mt-6 rounded-2xl bg-black/25 p-4 sm:p-5">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <label htmlFor="coupon-code" className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-[#c5a5ff]">
                   <Percent className="h-3.5 w-3.5" />
                   Have a Coupon or Referral Code?
                 </label>
                 {appliedCoupon && (
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5">
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-emerald-400">
                     Active Code
                   </span>
                 )}
               </div>
 
               {!appliedCoupon ? (
-                <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                <form onSubmit={handleApplyCoupon} className="flex flex-col gap-2 sm:flex-row">
                   <div className="relative flex-1">
                     <input
                       id="coupon-code"
@@ -994,13 +1041,13 @@ export default function TicketsPage() {
                       }}
                       placeholder="ENTER PROMO CODE (OPTIONAL)"
                       disabled={validatingCoupon}
-                      className="w-full rounded-lg bg-[#0b0908] px-4 py-3 text-xs uppercase tracking-wider text-white placeholder-white/30 outline-none ring-1 ring-white/15 transition focus:ring-[#ff7656]"
+                      className="w-full rounded-xl bg-[#09080f] px-4 py-3 text-xs uppercase tracking-wider text-white placeholder-white/30 outline-none ring-1 ring-white/15 transition focus:ring-2 focus:ring-[#FF00D4]/60"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={validatingCoupon || !couponCodeInput.trim()}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-[#e75a3b] px-6 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-[#f1704f] disabled:opacity-40"
+                    className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#FF00D4] px-6 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-[#e83cff] disabled:opacity-40 sm:h-auto"
                   >
                     {validatingCoupon ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -1010,9 +1057,9 @@ export default function TicketsPage() {
                   </button>
                 </form>
               ) : (
-                <div className="flex items-center justify-between border border-emerald-500/30 bg-emerald-950/20 px-4 py-3">
+                <div className="flex flex-col gap-3 rounded-xl border border-emerald-500/30 bg-emerald-950/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-sm bg-emerald-500/20 text-emerald-400">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
                       <Tag className="h-4 w-4" />
                     </span>
                     <div>
@@ -1020,7 +1067,7 @@ export default function TicketsPage() {
                         <span className="font-mono text-xs font-bold text-emerald-300">
                           {appliedCoupon.code}
                         </span>
-                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5">
+                        <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-mono text-emerald-400">
                           {appliedCoupon.discount_percent}% OFF
                         </span>
                       </div>
@@ -1057,25 +1104,25 @@ export default function TicketsPage() {
             {/* Attendee Profile Box */}
             <div className="mt-6 border-t border-white/10 pt-5">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-[#f4b64d]">
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-[#c5a5ff]">
                   Verified Attendee Profile
                 </h3>
                 <span className="text-[10px] font-mono text-emerald-400">Verified</span>
               </div>
               <div className="space-y-3 text-xs text-white/70">
-                <div className="flex justify-between border-b border-white/5 pb-2">
+                <div className="flex justify-between gap-4 border-b border-white/5 pb-2">
                   <span className="text-white/40">Full Name</span>
-                  <span className="text-white font-medium">
+                  <span className="min-w-0 break-words text-right font-medium text-white">
                     {user?.first_name} {user?.last_name}
                   </span>
                 </div>
-                <div className="flex justify-between border-b border-white/5 pb-2">
+                <div className="flex justify-between gap-4 border-b border-white/5 pb-2">
                   <span className="text-white/40">Email Address</span>
-                  <span className="text-white font-medium">{user?.email}</span>
+                  <span className="min-w-0 break-all text-right font-medium text-white">{user?.email}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-4">
                   <span className="text-white/40">Phone Number</span>
-                  <span className="text-white font-medium">{user?.phone || "Not set"}</span>
+                  <span className="text-right font-medium text-white">{user?.phone || "Not set"}</span>
                 </div>
               </div>
             </div>
@@ -1085,7 +1132,7 @@ export default function TicketsPage() {
                 type="button"
                 onClick={handleProceedPayment}
                 disabled={isPaying || checkingExisting || !!existingTicket}
-                className="flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#e75a3b] text-xs font-bold uppercase tracking-[0.14em] text-white transition-all hover:bg-[#f1704f] disabled:opacity-40"
+                className="flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#FF00D4] text-xs font-semibold uppercase tracking-[0.1em] text-white transition-all hover:bg-[#e83cff] disabled:opacity-40"
               >
                 {isPaying ? (
                   <>
@@ -1114,8 +1161,8 @@ export default function TicketsPage() {
 
         {/* STEP 3: Gateway Processing */}
         {checkoutStep === "processing" && (
-          <div className="mx-auto mt-20 max-w-md rounded-[1.5rem] bg-[#15110e] p-10 text-center sm:p-12">
-            <Loader2 className="mx-auto h-12 w-12 animate-spin text-[#ff7656]" />
+          <div className="mx-auto mt-8 max-w-md rounded-[1.75rem] border border-white/[0.08] bg-[#121019] p-8 text-center sm:mt-12 sm:p-12">
+            <Loader2 className="mx-auto h-12 w-12 animate-spin text-[#e7a9ff]" />
             <h3 className="mt-6 text-xl font-semibold text-white">
               Processing Booking
             </h3>
@@ -1128,7 +1175,7 @@ export default function TicketsPage() {
 
         {/* STEP 4: Order Confirmed & Ticket Issued */}
         {checkoutStep === "success" && (
-          <div className="mx-auto mt-12 max-w-2xl rounded-[1.5rem] bg-[#14120f] p-7 text-center sm:p-12">
+          <div className="mx-auto mt-8 max-w-2xl rounded-[1.75rem] border border-white/[0.08] bg-[#121019] p-5 text-center sm:mt-12 sm:p-12">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-400/10">
               <Check className="h-8 w-8 text-emerald-400" />
             </div>
