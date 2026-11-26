@@ -5,6 +5,7 @@ import { ScheduleTeaser } from "@/components/landing/schedule-teaser";
 import { FeaturedSpeakers } from "@/components/landing/featured-speakers";
 import { EventHighlights } from "@/components/landing/event-highlights";
 import { SponsorsPartners } from "@/components/landing/SponsorsPartners";
+import { BlackFridayPopup } from "@/components/landing/black-friday-popup";
 import { eventJsonLd } from "@/lib/seo";
 
 export default function Home() {
@@ -18,6 +19,7 @@ export default function Home() {
           __html: JSON.stringify(eventJsonLd).replace(/</g, String.fromCharCode(92) + "u003c"),
         }}
       />
+      <BlackFridayPopup />
       <Hero />
       <EventMarquee />
       <About />
