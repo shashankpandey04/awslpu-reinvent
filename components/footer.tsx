@@ -33,9 +33,9 @@ export function Footer() {
             </Link>
 
             <p className="mt-5 max-w-md text-sm leading-7 text-white/50 sm:text-base">
-              Five days of technology, ideas, and building what comes next.
+              Three days of technology, ideas, and building what comes next.
               <br />
-              November 30 to December 4, 2026.
+              December 2 to December 4, 2026.
             </p>
           </div>
 

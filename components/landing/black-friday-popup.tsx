@@ -102,7 +102,7 @@ export function BlackFridayPopup() {
             </span>
           </p>
           <h2 id="black-friday-popup-title" className="mt-5 text-lg font-semibold sm:text-xl">
-            Your next five days start here.
+            Your next three days start here.
           </h2>
           <p id="black-friday-popup-description" className="mt-2 max-w-md text-sm leading-relaxed text-white/60">
             {isBlackFridaySaleLive

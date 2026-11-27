@@ -36,7 +36,7 @@ export function About() {
               suppressHydrationWarning
               className="reveal reveal-delay-2 mt-7 max-w-xl text-[15px] font-light leading-7 text-white/65 sm:mt-10 sm:text-lg sm:leading-9"
             >
-              Five days dedicated to the people who turn curiosity into
+              Three days dedicated to the people who turn curiosity into
               creation. Re:Invent Fest 2026 brings developers, students,
               and innovators together to explore technology, exchange ideas,
               and build what comes next at Lovely Professional University.
@@ -48,7 +48,7 @@ export function About() {
             >
               <span className="h-px w-8 shrink-0 bg-linear-to-r from-[#FF00D4] to-[#6C00FF] sm:w-12" />
               <span className="text-sm leading-6 text-white/75">
-                November 30 to December 4, 2026
+                December 2 to December 4, 2026
               </span>
             </div>
           </div>

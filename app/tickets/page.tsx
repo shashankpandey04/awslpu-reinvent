@@ -570,7 +570,7 @@ export default function TicketsPage() {
           <div>
             <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#c5a5ff]">Find your place at the festival</p>
             <h2 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">Choose your pass</h2>
-            <p className="mt-1 text-[11px] text-white/50 sm:text-xs">Five days of cloud, builders and big ideas at Lovely Professional University.</p>
+            <p className="mt-1 text-[11px] text-white/50 sm:text-xs">Three days of cloud, builders and big ideas at Lovely Professional University.</p>
           </div>
           <p className="text-[9px] text-white/40 sm:text-right sm:text-[10px]">
             Live availability <span className="mx-1.5 text-white/20">·</span> Prices in INR
