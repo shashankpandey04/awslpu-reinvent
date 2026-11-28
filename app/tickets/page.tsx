@@ -90,7 +90,6 @@ export default function TicketsPage() {
   const [loadingCategories, setLoadingCategories] = useState(true)
   const [existingTicket, setExistingTicket] = useState<Ticket | null>(null)
   const [checkingExisting, setCheckingExisting] = useState(false)
-  const [blackFridayRemainingMs, setBlackFridayRemainingMs] = useState<number | null>(null)
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
   const [checkoutStep, setCheckoutStep] = useState<"select" | "review" | "processing" | "success">("select")
@@ -111,26 +110,6 @@ export default function TicketsPage() {
   const [validatingCoupon, setValidatingCoupon] = useState(false)
   const [couponError, setCouponError] = useState<string | null>(null)
   const [couponSuccess, setCouponSuccess] = useState<string | null>(null)
-
-  useEffect(() => {
-    // Use local midnight so the launch date follows the visitor's browser timezone.
-    const saleStartsAt = new Date(2026, 10, 27).getTime()
-    const initialRemainingMs = saleStartsAt - Date.now()
-    if (initialRemainingMs <= 0) {
-      setBlackFridayRemainingMs(0)
-      return
-    }
-
-    setBlackFridayRemainingMs(initialRemainingMs)
-    const updateCountdown = () => {
-      const remainingMs = saleStartsAt - Date.now()
-      setBlackFridayRemainingMs(Math.max(0, remainingMs))
-      if (remainingMs <= 0) window.clearInterval(intervalId)
-    }
-
-    const intervalId = window.setInterval(updateCountdown, 1000)
-    return () => window.clearInterval(intervalId)
-  }, [])
 
   useEffect(() => {
     async function fetchCategories() {
@@ -509,14 +488,6 @@ export default function TicketsPage() {
     const available = totalQty - soldQty - reservedQty
     return Boolean(c.is_sold_out) || totalQty <= 0 || available <= 0
   })
-  const isBlackFridaySaleLive = blackFridayRemainingMs === 0
-  const countdownParts = blackFridayRemainingMs === null ? null : {
-    days: Math.floor(blackFridayRemainingMs / 86_400_000),
-    hours: Math.floor((blackFridayRemainingMs % 86_400_000) / 3_600_000),
-    minutes: Math.floor((blackFridayRemainingMs % 3_600_000) / 60_000),
-    seconds: Math.floor((blackFridayRemainingMs % 60_000) / 1_000)
-  }
-
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050505] text-white">
       <div className="pointer-events-none fixed inset-0 z-0">
@@ -525,56 +496,30 @@ export default function TicketsPage() {
       </div>
 
       <div className="relative z-10 mx-auto max-w-[1440px] px-4 pb-36 pt-24 sm:px-8 sm:pb-28 sm:pt-28 lg:px-12">
-        <section aria-labelledby="black-friday-heading" className="relative mb-6 overflow-hidden rounded-[1.75rem] border border-white/[0.07] bg-[#121019] px-4 py-5 sm:mb-8 sm:rounded-[2rem] sm:px-7 sm:py-6">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_90%_0%,rgba(207,49,217,0.14),transparent_46%),radial-gradient(ellipse_at_0%_100%,rgba(88,65,191,0.12),transparent_52%)]" />
-          <div className="relative flex flex-col justify-between gap-3 sm:flex-row sm:items-end sm:gap-6">
-            <div className="min-w-0">
-              <p className="mb-1.5 flex items-center gap-1.5 text-[9px] font-medium uppercase tracking-[0.17em] text-[#c5a5ff]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#FF00D4]" />
-                AWS re:Invent Fest 2026 · {isBlackFridaySaleLive ? "Limited-time offer" : "Black Friday · Nov 27"}
+        {/* Page Header */}
+        <div className="border-b border-white/10 pb-8 sm:pb-10">
+          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+            <div>
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#c5a5ff] sm:text-xs">
+                AWS Student Builder Group <span className="text-[#FF00D4]">·</span> LPU
               </p>
-              <h1 id="black-friday-heading" className="text-[clamp(1.9rem,8vw,3.5rem)] font-semibold leading-[0.94] tracking-[-0.06em] text-white">
-                {isBlackFridaySaleLive ? (
-                  <>BLACK FRIDAY <span className="text-[#e7a9ff]">TICKET SALE</span></>
-                ) : (
-                  <>BLACK FRIDAY <span className="text-[#e7a9ff]">SALE COMING SOON</span></>
-                )}
+              <h1 className="text-3xl font-light tracking-[-0.05em] text-white sm:text-5xl lg:text-6xl">
+                Choose your pass
               </h1>
+              <p className="mt-3 max-w-xl text-xs font-light leading-relaxed text-white/60 sm:text-sm sm:leading-6">
+                Three days of cloud, builders, and big ideas at Lovely Professional University. December 2–4, 2026.
+              </p>
             </div>
-            <div className="w-full max-w-md text-left text-xs leading-relaxed text-white/65 sm:text-right sm:text-sm">
-              {isBlackFridaySaleLive ? (
-                <div className="rounded-2xl border border-[#f4c778]/25 bg-[#f4c778]/[0.08] p-3.5 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0">
-                  <p className="flex items-start gap-2 text-sm font-semibold leading-snug text-[#ffe0a6] sm:justify-end sm:text-sm">
-                    <TicketIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#f4c778] sm:hidden" />
-                    <span>
-                      Find your nearest AWS Registration Desk in LPU CSE Blocks for{" "}
-                      <span className="font-extrabold text-white">BLACK FRIDAY Code</span>
-                    </span>
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#e7a9ff]">Sale begins in IST (GMT+5:30)</p>
-                  <p role="timer" aria-live="off" aria-label="Countdown to the Black Friday sale" className="mt-1 font-mono text-sm font-semibold tabular-nums tracking-wide text-white sm:text-base">
-                    {countdownParts
-                      ? `${String(countdownParts.days).padStart(2, "0")}d ${String(countdownParts.hours).padStart(2, "0")}h ${String(countdownParts.minutes).padStart(2, "0")}m ${String(countdownParts.seconds).padStart(2, "0")}s`
-                      : "--d --h --m --s"}
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
-        </section>
 
-        <div className="mb-4 flex flex-col justify-between gap-2 sm:mb-5 sm:flex-row sm:items-end">
-          <div>
-            <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#c5a5ff]">Find your place at the festival</p>
-            <h2 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">Choose your pass</h2>
-            <p className="mt-1 text-[11px] text-white/50 sm:text-xs">Three days of cloud, builders and big ideas at Lovely Professional University.</p>
+            <div className="flex flex-wrap items-center gap-4 text-xs text-white/50 sm:justify-end sm:text-right">
+              <span className="flex items-center gap-1.5 font-mono text-[11px] text-white/70">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                Live Availability
+              </span>
+              <span className="text-white/20">·</span>
+              <span className="font-mono text-[11px] text-white/50">Prices in INR</span>
+            </div>
           </div>
-          <p className="text-[9px] text-white/40 sm:text-right sm:text-[10px]">
-            Live availability <span className="mx-1.5 text-white/20">·</span> Prices in INR
-          </p>
         </div>
 
         {/* Existing Ticket Alert (If user already has an active ticket) */}
@@ -609,7 +554,6 @@ export default function TicketsPage() {
           </div>
         )}
 
-        {/* Error notification banner */}
         {orderError && (
           <div className="mt-6 flex items-center justify-between rounded-xl bg-rose-950/35 p-4 text-xs text-rose-200">
             <div className="flex items-center gap-3">
@@ -763,7 +707,7 @@ export default function TicketsPage() {
                               {cat.description?.trim() ? (
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{cat.description}</ReactMarkdown>
                               ) : (
-                                <p className="text-white/50">Includes complete 5-day event access, keynotes, and meals.</p>
+                                <p className="text-white/50">Includes complete three-day event access, keynotes, and catering.</p>
                               )}
                             </div>
 
@@ -775,7 +719,7 @@ export default function TicketsPage() {
                                 {cat.description?.trim() ? (
                                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{cat.description}</ReactMarkdown>
                                 ) : (
-                                  <p className="text-white/50">Includes complete 5-day event access, keynotes, and meals.</p>
+                                  <p className="text-white/50">Includes complete three-day event access, keynotes, and catering.</p>
                                 )}
                               </div>
                             </details>
@@ -968,7 +912,7 @@ export default function TicketsPage() {
                 <div>
                   <p className="font-semibold text-white">{selectedCategory.name}</p>
                   <p className="text-xs text-white/50 font-sans">
-                    1 Official Delegate Pass · 5-Day Admission
+                    1 Official Delegate Pass · 3-Day Admission
                   </p>
                 </div>
                 <span className="text-xl font-semibold text-white">
