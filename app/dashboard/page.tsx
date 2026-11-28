@@ -22,11 +22,13 @@ import {
   Save,
   CheckCircle2,
   Ban,
-  Loader2
+  Loader2,
+  GraduationCap
 } from "lucide-react"
 import { useAuth } from "@/providers/auth-provider"
 import { QrCode } from "@/components/qr-code"
 import { PassLanyard } from "@/components/pass-lanyard"
+import { WorkshopTab } from "@/components/dashboard/workshop-tab"
 import type { Ticket } from "@/types/ticketing"
 
 function DashboardContent() {
@@ -34,8 +36,12 @@ function DashboardContent() {
   const searchParams = useSearchParams()
   const { user, loading, authenticated, refreshUser } = useAuth()
 
-  const [activeTab, setActiveTab] = useState<"overview" | "tickets" | "profile">(
-    searchParams.get("tab") === "profile" ? "profile" : "overview"
+  const [activeTab, setActiveTab] = useState<"overview" | "tickets" | "workshops" | "profile">(
+    searchParams.get("tab") === "workshops"
+      ? "workshops"
+      : searchParams.get("tab") === "profile"
+      ? "profile"
+      : "overview"
   )
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [loadingTickets, setLoadingTickets] = useState(true)
@@ -237,7 +243,7 @@ function DashboardContent() {
           </div>
         )}
 
-        <nav aria-label="Dashboard sections" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 gap-1 border-t border-white/[0.08] bg-[#09070d]/95 px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur-xl sm:sticky sm:top-2 sm:z-30 sm:mb-8 sm:flex sm:w-fit sm:gap-1 sm:overflow-x-auto sm:rounded-full sm:border-0 sm:bg-[#17131e]/90 sm:p-1.5 sm:shadow-[0_8px_28px_rgba(0,0,0,0.25)] sm:ring-1 sm:ring-white/[0.07] sm:scrollbar-none">
+        <nav aria-label="Dashboard sections" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 gap-1 border-t border-white/[0.08] bg-[#09070d]/95 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur-xl sm:sticky sm:top-2 sm:z-30 sm:mb-8 sm:flex sm:w-fit sm:gap-1 sm:overflow-x-auto sm:rounded-full sm:border-0 sm:bg-[#17131e]/90 sm:p-1.5 sm:shadow-[0_8px_28px_rgba(0,0,0,0.25)] sm:ring-1 sm:ring-white/[0.07] sm:scrollbar-none">
           <button
             type="button"
             onClick={() => setActiveTab("overview")}
@@ -274,6 +280,19 @@ function DashboardContent() {
                 {tickets.length}
               </span>
             )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("workshops")}
+            aria-pressed={activeTab === "workshops"}
+            className={`flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-1.5 text-[9px] font-semibold tracking-wide transition-all sm:min-h-0 sm:shrink-0 sm:flex-row sm:gap-2 sm:rounded-full sm:px-5 sm:py-2.5 sm:text-xs ${
+              activeTab === "workshops"
+                ? "bg-[#FF00D4] text-white shadow-[0_4px_16px_rgba(255,0,212,0.18)]"
+                : "text-white/55 hover:bg-white/[0.06] hover:text-white"
+            }`}
+          >
+            <GraduationCap className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+            <span>Workshops</span>
           </button>
           <button
             type="button"
@@ -571,6 +590,12 @@ function DashboardContent() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === "workshops" && (
+          <div className="mt-5 sm:mt-8">
+            <WorkshopTab user={user} />
           </div>
         )}
 
